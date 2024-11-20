@@ -18,12 +18,12 @@ This is a multi-day exercise to practice Node, Express, and PostgreSQL with rela
 
 ### **Goals & Requirements**
 
-- This is a pure API app, taking values from the query string (GET requests) or from a JSON body (other requests). It returns JSON.
-- This gets authentication/authorization with JWT tokens. Make sure your additions only allow access as specified in our requirements.
-- Be thoughtful about function and variable names, and write developer-friendly documentation *for every function and route* you write.
-- The starter code is well-tested, with excellent coverage. We expect your new contributions to maintain good coverage.
-- Model tests check the underlying database actions. Route tests check the underlying model methods and do not rely directly on the database changes. This is a useful testing design consideration and you should continue it.
-- We *strongly encourage you* to practice some test-driven development. Write a test before writing a model method and a route. You will find that this can make the work of adding to an app like this easier, and much less bug-prone.
+- [ ] This is a pure API app, taking values from the query string (GET requests) or from a JSON body (other requests). It returns JSON.
+- [ ] This gets authentication/authorization with JWT tokens. Make sure your additions only allow access as specified in our requirements.
+- [ ] Be thoughtful about function and variable names, and write developer-friendly documentation *for every function and route* you write.
+- [ ] The starter code is well-tested, with excellent coverage. We expect your new contributions to maintain good coverage.
+- [ ] Model tests check the underlying database actions. Route tests check the underlying model methods and do not rely directly on the database changes. This is a useful testing design consideration and you should continue it.
+- [ ] We *strongly encourage you* to practice some test-driven development. Write a test before writing a model method and a route. You will find that this can make the work of adding to an app like this easier, and much less bug-prone.
 
 **Take your time, be organized and clear, and test carefully. Have fun!**
 
@@ -32,6 +32,120 @@ This is a multi-day exercise to practice Node, Express, and PostgreSQL with rela
 Download the starter code. Do a quick skim of the code to get a sense of the main components and the organization.
 
 We’ve provided ***jobly.sql***, which will create a database (with a small amount of starter data) and a test database. Set those up. (Some of the tables included are not currently used by the application; you’ll add the parts of the app that will use those tables in the exercise).
+
+#### `jobly.sql` explained
+
+X. Full Code for `jobly.sql`:
+```sql
+\echo 'Delete and recreate jobly db?'
+\prompt 'Return for yes or control-C to cancel > ' foo
+
+DROP DATABASE jobly;
+CREATE DATABASE jobly;
+\connect jobly
+
+\i jobly-schema.sql
+\i jobly-seed.sql
+
+\echo 'Delete and recreate jobly_test db?'
+\prompt 'Return for yes or control-C to cancel > ' foo
+
+DROP DATABASE jobly_test;
+CREATE DATABASE jobly_test;
+\connect jobly_test
+
+\i jobly-schema.sql
+```
+
+1. This line prints a message to the terminal asking if you want to delete and recreate the `jobly` database.
+
+```sql
+\echo 'Delete and recreate jobly db?'
+```
+
+2. This line prompts the user to press **Enter** to proceed or **Control-C** to cancel the operation.
+```sql
+\prompt 'Return for yes or control-C to cancel > ' foo
+```
+
+3. This line deletes the existing `jobly` database if it exists. If the database does not exist, it will throw an error.
+```sql
+DROP DATABASE jobly;
+```
+
+4. This line creates a new jobly database.
+```sql
+CREATE DATABASE jobly;
+```
+
+5. This line connects to the newly created jobly database.
+```sql
+\connect jobly
+```
+
+6. This line runs the `jobly-schema.sql` file, which contains the SQL commands to create the necessary tables and schema for the `jobly` database.
+```sql
+\i jobly-schema.sql
+```
+
+7. This line prints a message to the terminal asking if you want to delete and recreate the jobly_test database.
+```sql
+\echo 'Delete and recreate jobly_test db?'
+```
+
+8. This line prompts the user to press Enter to proceed or Control-C to cancel the operation.
+```sql
+\prompt 'Return for yes or control-C to cancel > ' foo
+```
+
+9. This line deletes the existing `jobly_test` database if it exists. If the database does not exist, it will throw an error.
+```sql
+DROP DATABASE jobly_test;
+```
+
+10. This line creates a new `jobly_test` database.
+```sql
+CREATE DATABASE jobly_test;
+```
+
+
+
+11. This line connects to the newly created `jobly_test` database.
+```sql
+\connect jobly_test
+```
+
+12.  This line runs the `jobly-schema.sql` file, which contains the SQL commands to create the necessary tables and schema for the `jobly_test` database.
+
+```sql
+\i jobly-schema.sql
+```
+
+#### Instructions to Setting Up the Databases
+
+To set up the databases using the `jobly.sql` file, follow these steps:
+
+1. Open your terminal in Visual Studio Code (VSC) using WSL/Ubuntu.
+2. Ensure you have PostgreSQL installed and running. You can start PostgreSQL with the following command:
+```
+sudo service postgresql start
+```
+3. Navigate to the directory containing the `jobly.sql` file. For example:
+```
+cd path/to/your/project
+```
+4. Run the `jobly.sql` file using the `psql` command-line tool. This will execute the SQL commands in the file to set up your databases:
+```
+psql -U your_username -f jobly.sql
+```
+
+Remember to Replace `your_username` with your PostgreSQL username. You may be prompted to enter your password.
+
+5. Follow the prompts in the terminal. Press Enter to proceed with deleting and recreating the databases or Control-C to cancel.
+
+After completing these steps, you should have both the `jobly` and `jobly_test` databases set up with the necessary schema and initial data.
+
+---
 
 Read the tests and get an understanding of what the ***beforeEach*** and ***afterEach*** methods are specifically doing for our tests.
 
