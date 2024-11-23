@@ -9,6 +9,7 @@ This is the Express backend for Jobly, version 2.
     - [Part One: Setup / Starter Code](#part-one-setup--starter-code)
       - [`jobly.sql` explained](#joblysql-explained)
       - [Instructions to Setting Up the Databases](#instructions-to-setting-up-the-databases)
+      - [Description of the Server Startup Process](#description-of-the-server-startup-process)
         - [`app.js` and `app.test.js` explained](#appjs-and-apptestjs-explained)
           - [Explanation of `app.js`](#explanation-of-appjs)
           - [Explanation of `app.test.js`](#explanation-of-apptestjs)
@@ -23,14 +24,22 @@ This is the Express backend for Jobly, version 2.
         - [middleware (folder) / `auth.js` and `auth.test.js` explained](#middleware-folder--authjs-and-authtestjs-explained)
           - [Explanation of `auth.js`](#explanation-of-authjs)
           - [Explanation of `auth.test.js`](#explanation-of-authtestjs)
-        - [models (fodler) / `_testCommon.js` explained](#models-fodler--_testcommonjs-explained)
-        - [models (fodler) /  `company.js` and `company.test.js` explained](#models-fodler---companyjs-and-companytestjs-explained)
+        - [models (folder) / `_testCommon.js` explained](#models-folder--_testcommonjs-explained)
+        - [models (folder) /  `company.js` and `company.test.js` explained](#models-folder---companyjs-and-companytestjs-explained)
           - [Explanation of `company.js`](#explanation-of-companyjs)
           - [Explanation of `company.test.js`](#explanation-of-companytestjs)
-        - [models (fodler) / `user.js` and `user.test.js` explained](#models-fodler--userjs-and-usertestjs-explained)
+        - [models (folder) / `user.js` and `user.test.js` explained](#models-folder--userjs-and-usertestjs-explained)
           - [Explanation of `user.js`](#explanation-of-userjs)
           - [Explanation of `user.test.js`](#explanation-of-usertestjs)
         - [routes (folder) / `_testCommon.js` explained](#routes-folder--_testcommonjs-explained)
+        - [routes (folder) / `auth.js` and `auth.test.js` explained](#routes-folder--authjs-and-authtestjs-explained)
+          - [`auth.js`explained](#authjsexplained)
+          - [`auth.test.js`explained](#authtestjsexplained)
+        - [routes (folder) / `companies.js` and `companies.test.js` explained](#routes-folder--companiesjs-and-companiestestjs-explained)
+          - [`companies.js`explained](#companiesjsexplained)
+          - [`companies.test.js` explained](#companiestestjs-explained)
+        - [routes (folder) / `users.js` and `users.test.js` explained](#routes-folder--usersjs-and-userstestjs-explained)
+          - [`users.js`explained](#usersjsexplained)
       - [First Task: sqlForPartialUpdate](#first-task-sqlforpartialupdate)
     - [Part Two: Companies](#part-two-companies)
       - [Adding Filtering](#adding-filtering)
@@ -213,6 +222,59 @@ Read the tests and get an (I) understanding of what the (II) **_beforeEach_** 
 
 (III) Run our tests, with coverage. Any time you run our tests here, you will need to use the `-i` flag for Jest, so that the tests run “in band” (in order, not at the same time).
 
+##### Description of the Server Startup Process
+When you run the `command npm start`, it triggers the `start` script defined in the `package.json` file, which executes `node server.js`. This starts the server by performing the following steps:
+
+1. Load Configuration: The `config.js` file is loaded, which sets up environment variables and configuration settings such as the `SECRET_KEY`, `PORT`, and database URI.
+2. Database Connection: The `db.js` file is executed, which establishes a connection to the PostgreSQL database using the configuration settings.
+3. Initialize Express App: The `app.js` file is loaded, which sets up the Express application, including middleware for CORS, JSON parsing, logging, and JWT authentication. It also defines routes for authentication, companies, and users.
+4. Start the Server: The `server.js` file starts the Express server on the specified port and logs a message indicating that the server has started.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant npm
+    participant Node
+    participant Server
+    participant Config
+    participant DB
+    participant App
+
+    User->>npm: User runs the command `npm start`
+    npm->>Node: Executes `node server.js`
+    Node->>Server: Starts the server by running [server.js]
+    Server->>Config: Loads configuration settings from [config.js]
+    Config->>Config: Loads environment variables
+    Config->>Config: Sets SECRET_KEY, PORT, etc.
+    Server->>DB: Establishes database connection using [db.js]
+    DB->>Config: Retrieves database URI from configuration
+    DB->>DB: Connects to PostgreSQL database
+    Server->>App: Initializes the Express application using [app.js]
+    App->>App: Sets up middleware (CORS, JSON, logging, JWT)
+    App->>App: Defines routes (auth, companies, users)
+    Server->>App: Starts server on specified PORT
+    App->>User: Logs "Started on http://localhost:PORT"
+```
+
+**Explanation of the Sequence Diagram**
+
+This sequence diagram provides a visual representation of the function execution sequence and overall process of starting up the server when the npm start command is executed.
+
+1. `User` runs the command `npm start`.
+2. `npm` executes the start script, which runs `node server.js`.
+3. `Node` starts the server by running the `server.js` file.
+4. `Server` loads the `config.js` file to set up configuration settings.
+5. `Config` loads environment variables and sets configuration values such as `SECRET_KEY`, `PORT`, and the `database URI`.
+6. `Server` executes the db.js file to establish a connection to the PostgreSQL database.
+7. `DB` retrieves the `database URI` from the configuration and connects to the database.
+8. `Server` executes the `app.js` file to initialize the Express application.
+9. `App` sets up middleware for CORS, JSON parsing, logging, and JWT authentication.
+10. `App` defines routes for authentication, companies, and users.
+11. `Server` starts the Express server on the specified port.
+12. `App` logs a message indicating that the server has started and is listening on the specified port.
+
+
+
 ##### `app.js` and `app.test.js` explained
 
 ###### Explanation of `app.js`
@@ -358,8 +420,6 @@ jest --coverage -i
 
 - `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
 - `-i` **(in band)**: Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
-
-By running the tests with these options, you can ensure that your tests are executed in a controlled manner and get a detailed report on test coverage.
 
 ##### `config.js` and `config.test.js` explained
 
@@ -839,1070 +899,6 @@ describe("ensureLoggedIn", function () {
 
 5. Running Tests with Coverage and the `-i` Flag
 
-##### models (fodler) / `_testCommon.js` explained
-
-This file contains common setup and teardown functions for tests. These functions help ensure that the database is in a consistent state before and after each test.
-
-1. Imports and Setup
-
-- `bcrypt`: Library for hashing passwords.
-- `db`: Database connection.
-- `BCRYPT_WORK_FACTOR`: Configuration for the bcrypt hashing algorithm.
-
-```javascript
-const bcrypt = require("bcrypt");
-const db = require("../db.js");
-const { BCRYPT_WORK_FACTOR } = require("../config");
-```
-
-2. Function: `commonBeforeAll`
-
-This function runs once before all tests. It:
-
-- Deletes all records from the `companies` and `users` tables.
-- Inserts sample data into the `companies` table.
-- Inserts sample data into the `users` table with hashed passwords.
-
-```javscript
-async function commonBeforeAll() {
-  // noinspection SqlWithoutWhere
-  await db.query("DELETE FROM companies");
-  // noinspection SqlWithoutWhere
-  await db.query("DELETE FROM users");
-
-  await db.query(`
-    INSERT INTO companies(handle, name, num_employees, description, logo_url)
-    VALUES ('c1', 'C1', 1, 'Desc1', 'http://c1.img'),
-           ('c2', 'C2', 2, 'Desc2', 'http://c2.img'),
-           ('c3', 'C3', 3, 'Desc3', 'http://c3.img')`);
-
-  await db.query(`
-        INSERT INTO users(username,
-                          password,
-                          first_name,
-                          last_name,
-                          email)
-        VALUES ('u1', $1, 'U1F', 'U1L', 'u1@email.com'),
-               ('u2', $2, 'U2F', 'U2L', 'u2@email.com')
-        RETURNING username`,
-      [
-        await bcrypt.hash("password1", BCRYPT_WORK_FACTOR),
-        await bcrypt.hash("password2", BCRYPT_WORK_FACTOR),
-      ]);
-}
-```
-
-3. Function: `commonBeforeEach`
-   This function runs before each test. It starts a new database transaction.
-
-```javascript
-async function commonBeforeEach() {
-  await db.query("BEGIN");
-}
-```
-
-4. Function: `commonAfterEach`
-   This function runs after each test. It rolls back the database transaction, ensuring that any changes made during the test are not saved.
-
-```javascript
-async function commonAfterEach() {
-  await db.query("ROLLBACK");
-}
-```
-
-5. Function: `commonAfterAll`
-   This function runs once after all tests. It closes the database connection.
-
-```javascript
-async function commonAfterAll() {
-  await db.end();
-}
-```
-
-6. Export the Functions:
-
-```javascript
-module.exports = {
-  commonBeforeAll,
-  commonBeforeEach,
-  commonAfterEach,
-  commonAfterAll,
-};
-```
-
-7. Understanding `beforeEach` and `afterEach`
-   In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
-
-- `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
-  - In this file, `commonBeforeEach` starts a new database transaction before each test.
-    `afterEach`: Runs a specific piece of code after each test case. This is useful for cleaning up after each test to ensure tests do not affect each other.
-  - In this file, `commonAfterEach` rolls back the database transaction after each test.
-
-Running Tests with Coverage and the `-i` Flag
-To run the tests with coverage and ensure they run in order (in band), you can use the following command:
-
-```javascript
-jest --coverage -i
-```
-
-- `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
-- `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
-
-##### models (fodler) /  `company.js` and `company.test.js` explained
-
-This file contains the `Company` class, which provides methods for interacting with the `companies` table in the database.
-
-###### Explanation of `company.js`
-
-1. Imports and Setup:
-
-- `db`: Database connection.
-- `BadRequestError`, `NotFoundError`: Custom error classes.
-- `sqlForPartialUpdate`: Helper function for generating SQL for partial updates.
-
-```javascript
-"use strict";
-
-const db = require("../db");
-const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
-```
-
-2. Class: `Company`
-   - Method: `create`
-     - Creates a new company in the database.
-     - Throws `BadRequestError` if the company already exists.
-
-```javascript
-static async create({ handle, name, description, numEmployees, logoUrl }) {
-  const duplicateCheck = await db.query(
-        `SELECT handle
-         FROM companies
-         WHERE handle = $1`,
-      [handle]);
-
-  if (duplicateCheck.rows[0])
-    throw new BadRequestError(`Duplicate company: ${handle}`);
-
-  const result = await db.query(
-        `INSERT INTO companies
-         (handle, name, description, num_employees, logo_url)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
-      [
-        handle,
-        name,
-        description,
-        numEmployees,
-        logoUrl,
-      ],
-  );
-  const company = result.rows[0];
-
-  return company;
-}
-```
-
-2. Class: `Company`
-   - Method: `findAll`
-     - Retrieves all companies from the database.
-
-```javascript
-static async findAll() {
-  const companiesRes = await db.query(
-        `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-         FROM companies
-         ORDER BY name`);
-  return companiesRes.rows;
-}
-```
-
-2. Class: `Company`
-   - Method: `get`
-     - Retrieves a company by its handle.
-     - Throws `NotFoundError` if the company does not exist.
-
-```javascript
-static async get(handle) {
-  const companyRes = await db.query(
-        `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-         FROM companies
-         WHERE handle = $1`,
-      [handle]);
-
-  const company = companyRes.rows[0];
-
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
-
-  return company;
-}
-```
-
-2. Class: `Company`
-   - Method: `get`
-     - Updates a company's data.
-     - Throws `NotFoundError` if the company does not exist.
-
-```javascript
-static async update(handle, data) {
-  const { setCols, values } = sqlForPartialUpdate(
-      data,
-      {
-        numEmployees: "num_employees",
-        logoUrl: "logo_url",
-      });
-  const handleVarIdx = "$" + (values.length + 1);
-
-  const querySql = `UPDATE companies
-                    SET ${setCols}
-                    WHERE handle = ${handleVarIdx}
-                    RETURNING handle,
-                              name,
-                              description,
-                              num_employees AS "numEmployees",
-                              logo_url AS "logoUrl"`;
-  const result = await db.query(querySql, [...values, handle]);
-  const company = result.rows[0];
-
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
-
-  return company;
-}
-```
-
-2. Class: `Company`
-   - Method: `remove`
-     - Deletes a company from the database.
-     - Throws `NotFoundError` if the company does not exist.
-
-```javascript
-static async remove(handle) {
-  const result = await db.query(
-        `DELETE
-         FROM companies
-         WHERE handle = $1
-         RETURNING handle`,
-      [handle]);
-  const company = result.rows[0];
-
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
-}
-```
-
-3. Export the Class
-
-```javascript
-module.exports = Company;
-```
-
-###### Explanation of `company.test.js`
-
-This file contains tests for the `Company` class using the `jest` testing framework.
-
-1. Imports and Setup
-
-- `db`: Database connection.
-- `BadRequestError`, `NotFoundError`: Custom error classes.
-- `Company`: The Company class to be tested.
-- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
-
-```javascript
-"use strict";
-
-const db = require("../db.js");
-const { BadRequestError, NotFoundError } = require("../expressError");
-const Company = require("./company.js");
-const {
-  commonBeforeAll,
-  commonBeforeEach,
-  commonAfterEach,
-  commonAfterAll,
-} = require("./_testCommon");
-
-beforeAll(commonBeforeAll);
-beforeEach(commonBeforeEach);
-afterEach(commonAfterEach);
-afterAll(commonAfterAll);
-```
-
-2. Test Suite: `create`
-
-- Test for Successful Creation:
-  - Verifies that a new company can be created and retrieved from the database.
-- Test for Duplicate Creation:
-  - Verifies that creating a duplicate company throws a `BadRequestError`.
-
-```javascript
-describe("create", function () {
-  const newCompany = {
-    handle: "new",
-    name: "New",
-    description: "New Description",
-    numEmployees: 1,
-    logoUrl: "http://new.img",
-  };
-
-  test("works", async function () {
-    let company = await Company.create(newCompany);
-    expect(company).toEqual(newCompany);
-
-    const result = await db.query(
-      `SELECT handle, name, description, num_employees, logo_url
-           FROM companies
-           WHERE handle = 'new'`
-    );
-    expect(result.rows).toEqual([
-      {
-        handle: "new",
-        name: "New",
-        description: "New Description",
-        num_employees: 1,
-        logo_url: "http://new.img",
-      },
-    ]);
-  });
-
-  test("bad request with dupe", async function () {
-    try {
-      await Company.create(newCompany);
-      await Company.create(newCompany);
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-});
-```
-
-3. Test Suite: `findAll`
-
-- Test for Retrieving All Companies
-  - Verifies that all companies can be retrieved from the database.
-
-```javascript
-describe("findAll", function () {
-  test("works: no filter", async function () {
-    let companies = await Company.findAll();
-    expect(companies).toEqual([
-      {
-        handle: "c1",
-        name: "C1",
-        description: "Desc1",
-        numEmployees: 1,
-        logoUrl: "http://c1.img",
-      },
-      {
-        handle: "c2",
-        name: "C2",
-        description: "Desc2",
-        numEmployees: 2,
-        logoUrl: "http://c2.img",
-      },
-      {
-        handle: "c3",
-        name: "C3",
-        description: "Desc3",
-        numEmployees: 3,
-        logoUrl: "http://c3.img",
-      },
-    ]);
-  });
-});
-```
-
-4. Test Suite: `get`
-
-- Test for Retrieving a Company:
-  - Verifies that a company can be retrieved by its handle.
-- Test for Non-Existent Company:
-  - Verifies that retrieving a non-existent company throws a `NotFoundError`.
-
-```javascript
-describe("get", function () {
-  test("works", async function () {
-    let company = await Company.get("c1");
-    expect(company).toEqual({
-      handle: "c1",
-      name: "C1",
-      description: "Desc1",
-      numEmployees: 1,
-      logoUrl: "http://c1.img",
-    });
-  });
-
-  test("not found if no such company", async function () {
-    try {
-      await Company.get("nope");
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-});
-```
-
-5. Test Suite: `update`
-   - Test for Successful Update:
-     - Verifies that a company's data can be updated.
-   - Test for Update with Null Fields:
-     - Verifies that a company's data can be updated with null fields.
-   - Test for Non-Existent Company:
-     - Verifies that updating a non-existent company throws a `NotFoundError`.
-   - Test for Update with No Data:
-     - Verifies that updating a company with no data throws a `BadRequestError`.
-
-```javascript
-describe("update", function () {
-  const updateData = {
-    name: "New",
-    description: "New Description",
-    numEmployees: 10,
-    logoUrl: "http://new.img",
-  };
-
-  test("works", async function () {
-    let company = await Company.update("c1", updateData);
-    expect(company).toEqual({
-      handle: "c1",
-      ...updateData,
-    });
-
-    const result = await db.query(
-      `SELECT handle, name, description, num_employees, logo_url
-           FROM companies
-           WHERE handle = 'c1'`
-    );
-    expect(result.rows).toEqual([
-      {
-        handle: "c1",
-        name: "New",
-        description: "New Description",
-        num_employees: 10,
-        logo_url: "http://new.img",
-      },
-    ]);
-  });
-
-  test("works: null fields", async function () {
-    const updateDataSetNulls = {
-      name: "New",
-      description: "New Description",
-      numEmployees: null,
-      logoUrl: null,
-    };
-
-    let company = await Company.update("c1", updateDataSetNulls);
-    expect(company).toEqual({
-      handle: "c1",
-      ...updateDataSetNulls,
-    });
-
-    const result = await db.query(
-      `SELECT handle, name, description, num_employees, logo_url
-           FROM companies
-           WHERE handle = 'c1'`
-    );
-    expect(result.rows).toEqual([
-      {
-        handle: "c1",
-        name: "New",
-        description: "New Description",
-        num_employees: null,
-        logo_url: null,
-      },
-    ]);
-  });
-
-  test("not found if no such company", async function () {
-    try {
-      await Company.update("nope", updateData);
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("bad request with no data", async function () {
-    try {
-      await Company.update("c1", {});
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-});
-```
-
-6. Test Suite: `remove`
-
-- Test for Successful Removal:
-  - Verifies that a company can be removed from the database.
-- Test for Non-Existent Company:
-  - Verifies that removing a non-existent company throws a `NotFoundError`.
-
-```javascript
-describe("remove", function () {
-  test("works", async function () {
-    await Company.remove("c1");
-    const res = await db.query(
-      "SELECT handle FROM companies WHERE handle='c1'"
-    );
-    expect(res.rows.length).toEqual(0);
-  });
-
-  test("not found if no such company", async function () {
-    try {
-      await Company.remove("nope");
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-});
-```
-
-7. Understanding `beforeEach` and `afterEach`
-   In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
-
-- `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
-  - In this file, `commonBeforeEach` starts a new database transaction before each test.
-- `afterEach`: Runs a specific piece of code after each test case. This is useful for cleaning up after each test to ensure tests do not affect each other.
-  - In this file, `commonAfterEach` rolls back the database transaction after each test.
-
-8. Running Tests with Coverage and the `-i` Flag
-   To run the tests with coverage and ensure they run in order (in band), you can use the following command:
-
-- `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
-- `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
-
-```javascript
-jest --coverage -i
-```
-
-By running the tests with these options, you can ensure that your tests are executed in a controlled manner and get a detailed report on test coverage.
-
-##### models (fodler) / `user.js` and `user.test.js` explained
-
-This file contains the `User` class, which provides methods for interacting with the `users` table in the database.
-
-###### Explanation of `user.js`
-
-This file contains the `User` class, which provides methods for interacting with the `users` table in the database.
-
-1. Imports and Setup:
-
-- `db`: Database connection.
-- `bcrypt`: Library for hashing passwords.
-- `sqlForPartialUpdate`: Helper function for generating SQL for partial updates.
-- `NotFoundError`, `BadRequestError`, `UnauthorizedError`: Custom error classes.
-- `BCRYPT_WORK_FACTOR`: Configuration for the bcrypt hashing algorithm.
-
-```javascript
-"use strict";
-
-const db = require("../db");
-const bcrypt = require("bcrypt");
-const { sqlForPartialUpdate } = require("../helpers/sql");
-const {
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-} = require("../expressError");
-
-const { BCRYPT_WORK_FACTOR } = require("../config.js");
-```
-
-2. Class: `User`
-   - Method: `authenticate`
-     - Authenticates a user with a username and password.
-     - Throws `UnauthorizedError` if the user is not found or the password is incorrect.
-
-```javascript
-static async authenticate(username, password) {
-  const result = await db.query(
-        `SELECT username,
-                password,
-                first_name AS "firstName",
-                last_name AS "lastName",
-                email,
-                is_admin AS "isAdmin"
-         FROM users
-         WHERE username = $1`,
-      [username],
-  );
-
-  const user = result.rows[0];
-
-  if (user) {
-    const isValid = await bcrypt.compare(password, user.password);
-    if (isValid === true) {
-      delete user.password;
-      return user;
-    }
-  }
-
-  throw new UnauthorizedError("Invalid username/password");
-}
-```
-
-3. Class: `User`
-   - Method: `register`
-     - Registers a new user with the provided data.
-     - Throws `BadRequestError` if the username already exists.
-
-```javascript
-static async register({ username, password, firstName, lastName, email, isAdmin }) {
-  const duplicateCheck = await db.query(
-        `SELECT username
-         FROM users
-         WHERE username = $1`,
-      [username],
-  );
-
-  if (duplicateCheck.rows[0]) {
-    throw new BadRequestError(`Duplicate username: ${username}`);
-  }
-
-  const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
-
-  const result = await db.query(
-        `INSERT INTO users
-         (username,
-          password,
-          first_name,
-          last_name,
-          email,
-          is_admin)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING username, first_name AS "firstName", last_name AS "lastName", email, is_admin AS "isAdmin"`,
-      [
-        username,
-        hashedPassword,
-        firstName,
-        lastName,
-        email,
-        isAdmin,
-      ],
-  );
-
-  const user = result.rows[0];
-
-  return user;
-}
-```
-
-4. Class: `User`
-   - Method: `findAll`
-     - Retrieves all users from the database.
-
-```javascript
-static async findAll() {
-  const result = await db.query(
-        `SELECT username,
-                first_name AS "firstName",
-                last_name AS "lastName",
-                email,
-                is_admin AS "isAdmin"
-         FROM users
-         ORDER BY username`,
-  );
-
-  return result.rows;
-}
-```
-
-5. Class: `User`
-   - Method: `get`
-     - Retrieves a user by their username.
-     - Throws `NotFoundError` if the user does not exist.
-
-```javascript
-static async get(username) {
-  const userRes = await db.query(
-        `SELECT username,
-                first_name AS "firstName",
-                last_name AS "lastName",
-                email,
-                is_admin AS "isAdmin"
-         FROM users
-         WHERE username = $1`,
-      [username],
-  );
-
-  const user = userRes.rows[0];
-
-  if (!user) throw new NotFoundError(`No user: ${username}`);
-
-  return user;
-}
-```
-
-6. Class: `User`
-   - Method: `update`
-     - Updates a user's data.
-     - Throws `NotFoundError` if the user does not exist.
-
-```javascript
-static async update(username, data) {
-  if (data.password) {
-    data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
-  }
-
-  const { setCols, values } = sqlForPartialUpdate(
-      data,
-      {
-        firstName: "first_name",
-        lastName: "last_name",
-        isAdmin: "is_admin",
-      });
-  const usernameVarIdx = "$" + (values.length + 1);
-
-  const querySql = `UPDATE users
-                    SET ${setCols}
-                    WHERE username = ${usernameVarIdx}
-                    RETURNING username,
-                              first_name AS "firstName",
-                              last_name AS "lastName",
-                              email,
-                              is_admin AS "isAdmin"`;
-  const result = await db.query(querySql, [...values, username]);
-  const user = result.rows[0];
-
-  if (!user) throw new NotFoundError(`No user: ${username}`);
-
-  delete user.password;
-  return user;
-}
-```
-
-7. Class: `User`
-   - Method: `remove`
-     - Deletes a user from the database.
-     - Throws `NotFoundError` if the user does not exist.
-
-```javascript
-static async remove(username) {
-  let result = await db.query(
-        `DELETE
-         FROM users
-         WHERE username = $1
-         RETURNING username`,
-      [username],
-  );
-  const user = result.rows[0];
-
-  if (!user) throw new NotFoundError(`No user: ${username}`);
-}
-```
-
-8. Export the Class:
-
-```javascript
-module.exports = User;
-```
-
-###### Explanation of `user.test.js`
-
-This file contains tests for the `User` class using the `jest` testing framework.
-
-1. Imports and Setup:
-- `db`: Database connection.
-- `NotFoundError`, `BadRequestError`, `UnauthorizedError`: Custom error classes.
-- `User`: The `User` class to be tested.
-- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
-```javascript
-"use strict";
-
-const {
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-} = require("../expressError");
-const db = require("../db.js");
-const User = require("./user.js");
-const {
-  commonBeforeAll,
-  commonBeforeEach,
-  commonAfterEach,
-  commonAfterAll,
-} = require("./_testCommon");
-
-beforeAll(commonBeforeAll);
-beforeEach(commonBeforeEach);
-afterEach(commonAfterEach);
-afterAll(commonAfterAll);
-```
-
-2. Test Suite: `authenticate`
-- Test for Successful Authentication:
-  - Verifies that a user can be authenticated with the correct username and password.
-- Test for Non-Existent User:
-  - Verifies that an `UnauthorizedError` is thrown if the user does not exist.
-- Test for Incorrect Password:
-  - Verifies that an `UnauthorizedError` is thrown if the password is incorrect.
-```javascript
-describe("authenticate", function () {
-  test("works", async function () {
-    const user = await User.authenticate("u1", "password1");
-    expect(user).toEqual({
-      username: "u1",
-      firstName: "U1F",
-      lastName: "U1L",
-      email: "u1@email.com",
-      isAdmin: false,
-    });
-  });
-
-  test("unauth if no such user", async function () {
-    try {
-      await User.authenticate("nope", "password");
-      fail();
-    } catch (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
-    }
-  });
-
-  test("unauth if wrong password", async function () {
-    try {
-      await User.authenticate("u1", "wrong");
-      fail();
-    } catch (err) {
-      expect(err instanceof UnauthorizedError).toBeTruthy();
-    }
-  });
-});
-```
-
-3. Test Suite: `register`
-- Test for Successful Registration:
-  - Verifies that a new user can be registered and retrieved from the database.
-- Test for Admin Registration:
-  - Verifies that a new admin user can be registered and retrieved from the database.
-- Test for Duplicate Registration:
-  - Verifies that registering a duplicate user throws a `BadRequestError`.
-```javascript
-describe("register", function () {
-  const newUser = {
-    username: "new",
-    firstName: "Test",
-    lastName: "Tester",
-    email: "test@test.com",
-    isAdmin: false,
-  };
-
-  test("works", async function () {
-    let user = await User.register({
-      ...newUser,
-      password: "password",
-    });
-    expect(user).toEqual(newUser);
-    const found = await db.query("SELECT * FROM users WHERE username = 'new'");
-    expect(found.rows.length).toEqual(1);
-    expect(found.rows[0].is_admin).toEqual(false);
-    expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
-  });
-
-  test("works: adds admin", async function () {
-    let user = await User.register({
-      ...newUser,
-      password: "password",
-      isAdmin: true,
-    });
-    expect(user).toEqual({ ...newUser, isAdmin: true });
-    const found = await db.query("SELECT * FROM users WHERE username = 'new'");
-    expect(found.rows.length).toEqual(1);
-    expect(found.rows[0].is_admin).toEqual(true);
-    expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
-  });
-
-  test("bad request with dup data", async function () {
-    try {
-      await User.register({
-        ...newUser,
-        password: "password",
-      });
-      await User.register({
-        ...newUser,
-        password: "password",
-      });
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-});
-```
-
-4. Test Suite: `findAll`
-- Test for Retrieving All Users:
-  - Verifies that all users can be retrieved from the database.
-```javascript
-describe("findAll", function () {
-  test("works", async function () {
-    const users = await User.findAll();
-    expect(users).toEqual([
-      {
-        username: "u1",
-        firstName: "U1F",
-        lastName: "U1L",
-        email: "u1@email.com",
-        isAdmin: false,
-      },
-      {
-        username: "u2",
-        firstName: "U2F",
-        lastName: "U2L",
-        email: "u2@email.com",
-        isAdmin: false,
-      },
-    ]);
-  });
-});
-```
-
-5. Test Suite: `get`
-   - Test for Retrieving a User:
-     - Verifies that a user can be retrieved by their username.
-   - Test for Non-Existent User:
-     - Verifies that retrieving a non-existent user throws a NotFoundError.
-```javascript
-describe("get", function () {
-  test("works", async function () {
-    let user = await User.get("u1");
-    expect(user).toEqual({
-      username: "u1",
-      firstName: "U1F",
-      lastName: "U1L",
-      email: "u1@email.com",
-      isAdmin: false,
-    });
-  });
-
-  test("not found if no such user", async function () {
-    try {
-      await User.get("nope");
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-});
-```
-
-6. Test Suite: `update`
-- Test for Successful Update:
-  - Verifies that a user's data can be updated.
-- Test for Updating Password:
-  - Verifies that a user's password can be updated.
-- Test for Non-Existent User:
-  - Verifies that updating a non-existent user throws a `NotFoundError`.
-- Test for Update with No Data:
-  - Verifies that updating a user with no data throws a `BadRequestError`.
-```javascript
-describe("update", function () {
-  const updateData = {
-    firstName: "NewF",
-    lastName: "NewF",
-    email: "new@email.com",
-    isAdmin: true,
-  };
-
-  test("works", async function () {
-    let job = await User.update("u1", updateData);
-    expect(job).toEqual({
-      username: "u1",
-      ...updateData,
-    });
-  });
-
-  test("works: set password", async function () {
-    let job = await User.update("u1", {
-      password: "new",
-    });
-    expect(job).toEqual({
-      username: "u1",
-      firstName: "U1F",
-      lastName: "U1L",
-      email: "u1@email.com",
-      isAdmin: false,
-    });
-    const found = await db.query("SELECT * FROM users WHERE username = 'u1'");
-    expect(found.rows.length).toEqual(1);
-    expect(found.rows[0].password.startsWith("$2b$")).toEqual(true);
-  });
-
-  test("not found if no such user", async function () {
-    try {
-      await User.update("nope", {
-        firstName: "test",
-      });
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("bad request if no data", async function () {
-    expect.assertions(1);
-    try {
-      await User.update("c1", {});
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-});
-```
-
-7. Test Suite: `remove`
-- Test for Successful Removal:
-  - Verifies that a user can be removed from the database.
-- Test for Non-Existent User:
-  - Verifies that removing a non-existent user throws a `NotFoundError`.
-```javascript
-describe("remove", function () {
-  test("works", async function () {
-    await User.remove("u1");
-    const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
-    expect(res.rows.length).toEqual(0);
-  });
-
-  test("not found if no such user", async function () {
-    try {
-      await User.remove("nope");
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-});
-```
-
-8. Understanding `beforeEach` and `afterEach`
-In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
-
-- `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
-  - In this file, `commonBeforeEach` starts a new database transaction before each test.
-- `afterEach`: Runs a specific piece of code after each test case. This is useful for cleaning up after each test to ensure tests do not affect each other.
-  - In this file, `commonAfterEach` rolls back the database transaction after each test.
-
-9. Running Tests with Coverage and the `-i` Flag
-To run the tests with coverage and ensure they run in order (in band), you can use the following command:
-```javascript
-jest --coverage -i
-```
-- `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
-- `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
-
 ##### routes (folder) / `_testCommon.js` explained
 This file contains common setup and teardown functions for tests in the routes folder. These functions help ensure that the database is in a consistent state before and after each test.
 
@@ -2043,10 +1039,1115 @@ jest --coverage -i'
 - `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
 - `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
 
----
+##### routes (folder) / `auth.js` and `auth.test.js` explained
 
----
+###### `auth.js`explained
 
+This file contains the routes for handling authentication in the Jobly application.
+
+1. Imports and Setup
+- `jsonschema`: Library for validating JSON objects against a schema.
+- `User`: The `User` model for interacting with the `users` table.
+- `express`: The main framework used to build the web server.
+- `createToken`: Function to create JSON Web Tokens (JWT).
+- `userAuthSchema`, `userRegisterSchema`: JSON schemas for validating user authentication and registration data.
+- `BadRequestError`: Custom error class for handling bad requests.
+```javascript
+"use strict";
+
+const jsonschema = require("jsonschema");
+const User = require("../models/user");
+const express = require("express");
+const router = new express.Router();
+const { createToken } = require("../helpers/tokens");
+const userAuthSchema = require("../schemas/userAuth.json");
+const userRegisterSchema = require("../schemas/userRegister.json");
+const { BadRequestError } = require("../expressError");
+```
+
+2. Route: `POST /auth/token`
+- Validates the request body against the `userAuthSchema`.
+- Authenticates the user with the provided username and password.
+- Creates a JWT token for the authenticated user.
+- Returns the token in the response.
+```javascript
+router.post("/token", async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, userAuthSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const { username, password } = req.body;
+    const user = await User.authenticate(username, password);
+    const token = createToken(user);
+    return res.json({ token });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+3. Route: `POST /auth/register`
+- Validates the request body against the `userRegisterSchema`.
+- Registers a new user with the provided data.
+- Creates a JWT token for the new user.
+- Returns the token in the response.
+```javascript
+router.post("/register", async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, userRegisterSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const newUser = await User.register({ ...req.body, isAdmin: false });
+    const token = createToken(newUser);
+    return res.status(201).json({ token });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+4. Export the Router:
+```javascript
+module.exports = router;
+```
+
+###### `auth.test.js`explained
+
+This file contains tests for the authentication routes using the `jest` testing framework.
+
+1. Imports and Setup
+- `request`: Library for testing HTTP requests.
+- `app`: The Express application.
+- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
+
+2. Test Suite: `POST /auth/token`
+- Test for Successful Token Generation:
+  - Verifies that a token is generated for a valid username and password.
+- Test for Non-Existent User:
+  - Verifies that a 401 status code is returned for a non-existent user.
+- Test for Incorrect Password:
+  - Verifies that a 401 status code is returned for an incorrect password.
+- Test for Missing Data:
+  - Verifies that a 400 status code is returned for missing data.
+- Test for Invalid Data:
+  - Verifies that a 400 status code is returned for invalid data.
+```javascript
+describe("POST /auth/token", function () {
+  test("works", async function () {
+    const resp = await request(app)
+        .post("/auth/token")
+        .send({
+          username: "u1",
+          password: "password1",
+        });
+    expect(resp.body).toEqual({
+      "token": expect.any(String),
+    });
+  });
+
+  test("unauth with non-existent user", async function () {
+    const resp = await request(app)
+        .post("/auth/token")
+        .send({
+          username: "no-such-user",
+          password: "password1",
+        });
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth with wrong password", async function () {
+    const resp = await request(app)
+        .post("/auth/token")
+        .send({
+          username: "u1",
+          password: "nope",
+        });
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("bad request with missing data", async function () {
+    const resp = await request(app)
+        .post("/auth/token")
+        .send({
+          username: "u1",
+        });
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request with invalid data", async function () {
+    const resp = await request(app)
+        .post("/auth/token")
+        .send({
+          username: 42,
+          password: "above-is-a-number",
+        });
+    expect(resp.statusCode).toEqual(400);
+  });
+});
+```
+
+3. Test Suite: `POST /auth/register`
+- Test for Successful Registration:
+  - Verifies that a new user can be registered and a token is generated.
+- Test for Missing Fields:
+  - Verifies that a 400 status code is returned for missing fields.
+- Test for Invalid Data:
+  - Verifies that a 400 status code is returned for invalid data.
+```javascript
+describe("POST /auth/register", function () {
+  test("works for anon", async function () {
+    const resp = await request(app)
+        .post("/auth/register")
+        .send({
+          username: "new",
+          firstName: "first",
+          lastName: "last",
+          password: "password",
+          email: "new@email.com",
+        });
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      "token": expect.any(String),
+    });
+  });
+
+  test("bad request with missing fields", async function () {
+    const resp = await request(app)
+        .post("/auth/register")
+        .send({
+          username: "new",
+        });
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request with invalid data", async function () {
+    const resp = await request(app)
+        .post("/auth/register")
+        .send({
+          username: "new",
+          firstName: "first",
+          lastName: "last",
+          password: "password",
+          email: "not-an-email",
+        });
+    expect(resp.statusCode).toEqual(400);
+  });
+});
+```
+
+4. Understanding `beforeEach` and `afterEach`
+In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+
+`beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
+In this file, `commonBeforeEach` starts a new database transaction before each test.
+`afterEach`: Runs a specific piece of code after each test case. This is useful for cleaning up after each test to ensure tests do not affect each other.
+In this file, `commonAfterEach` rolls back the database transaction after each test.
+
+5. Running Tests with Coverage and the `-i` Flag
+To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+```javascript
+jest --coverage -i
+```
+- `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
+- `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
+
+
+##### routes (folder) / `companies.js` and `companies.test.js` explained
+
+###### `companies.js`explained
+
+This file contains the routes for handling company-related operations in the Jobly application.
+
+1. Imports and Setup
+- `jsonschema`: Library for validating JSON objects against a schema.
+- `express`: The main framework used to build the web server.
+- `BadRequestError`: Custom error class for handling bad requests.
+- `ensureLoggedIn`: Middleware to ensure the user is logged in.
+- `Company`: The `Company` model for interacting with the `companies` table.
+- `companyNewSchema`, `companyUpdateSchema`: JSON schemas for validating company data.
+```javascript
+"use strict";
+
+const jsonschema = require("jsonschema");
+const express = require("express");
+
+const { BadRequestError } = require("../expressError");
+const { ensureLoggedIn } = require("../middleware/auth");
+const Company = require("../models/company");
+
+const companyNewSchema = require("../schemas/companyNew.json");
+const companyUpdateSchema = require("../schemas/companyUpdate.json");
+
+const router = new express.Router();
+```
+
+2. Route: `POST /companies`
+- Validates the request body against the `companyNewSchema`.
+- Creates a new company with the provided data.
+- Returns the created company in the response.
+```javascript
+router.post("/", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, companyNewSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const company = await Company.create(req.body);
+    return res.status(201).json({ company });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+3. Route: `GET /companies`
+- Retrieves all companies from the database.
+- Returns the list of companies in the response.
+```javascript
+router.get("/", async function (req, res, next) {
+  try {
+    const companies = await Company.findAll();
+    return res.json({ companies });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+4. Route: `GET /companies/:handle`
+- Retrieves a company by its handle.
+- Returns the company data in the response.
+```javascript
+router.get("/:handle", async function (req, res, next) {
+  try {
+    const company = await Company.get(req.params.handle);
+    return res.json({ company });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+5. Route: `PATCH /companies/:handle`
+- Validates the request body against the `companyUpdateSchema`.
+- Updates the company data with the provided fields.
+- Returns the updated company data in the response.
+```javascript
+router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, companyUpdateSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const company = await Company.update(req.params.handle, req.body);
+    return res.json({ company });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+6. Route: `DELETE /companies/:handle`
+- Deletes a company by its handle.
+- Returns a confirmation message in the response.
+```javascript
+router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
+  try {
+    await Company.remove(req.params.handle);
+    return res.json({ deleted: req.params.handle });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+7. Export the Router:
+```javascript
+module.exports = router;
+```
+
+###### `companies.test.js` explained
+
+This file contains tests for the company routes using the jest testing framework.
+
+1. Imports and Setup
+- `request`: Library for testing HTTP requests.
+- `db`: Database connection.
+- `app`: The Express application.
+- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
+`u1Token`: JWT token for user `u1`.
+```javascript
+"use strict";
+
+const request = require("supertest");
+
+const db = require("../db");
+const app = require("../app");
+
+const {
+  commonBeforeAll,
+  commonBeforeEach,
+  commonAfterEach,
+  commonAfterAll,
+  u1Token,
+} = require("./_testCommon");
+
+beforeAll(commonBeforeAll);
+beforeEach(commonBeforeEach);
+afterEach(commonAfterEach);
+afterAll(commonAfterAll);
+```
+
+2. Test Suite: `POST /companies`
+- Test for Successful Creation:
+  - Verifies that a new company can be created with valid data.
+- Test for Missing Data:
+  - Verifies that a 400 status code is returned for missing data.
+- Test for Invalid Data:
+  - Verifies that a 400 status code is returned for invalid data.
+```javascript
+describe("POST /companies", function () {
+  const newCompany = {
+    handle: "new",
+    name: "New",
+    logoUrl: "http://new.img",
+    description: "DescNew",
+    numEmployees: 10,
+  };
+
+  test("ok for users", async function () {
+    const resp = await request(app)
+        .post("/companies")
+        .send(newCompany)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      company: newCompany,
+    });
+  });
+
+  test("bad request with missing data", async function () {
+    const resp = await request(app)
+        .post("/companies")
+        .send({
+          handle: "new",
+          numEmployees: 10,
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request with invalid data", async function () {
+    const resp = await request(app)
+        .post("/companies")
+        .send({
+          ...newCompany,
+          logoUrl: "not-a-url",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+});
+```
+
+3. Test Suite: `GET /companies`
+- Test for Retrieving All Companies:
+  - Verifies that all companies can be retrieved.
+- Test for Error Handling:
+  - Verifies that a 500 status code is returned when an error occurs.
+```javascript
+describe("GET /companies", function () {
+  test("ok for anon", async function () {
+    const resp = await request(app).get("/companies");
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            },
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+            {
+              handle: "c3",
+              name: "C3",
+              description: "Desc3",
+              numEmployees: 3,
+              logoUrl: "http://c3.img",
+            },
+          ],
+    });
+  });
+
+  test("fails: test next() handler", async function () {
+    await db.query("DROP TABLE companies CASCADE");
+    const resp = await request(app)
+        .get("/companies")
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(500);
+  });
+});
+```
+
+4. Test Suite: `GET /companies/:handle`
+- Test for Retrieving a Company:
+  - Verifies that a company can be retrieved by its handle.
+- Test for Non-Existent Company:
+  - Verifies that a 404 status code is returned for a non-existent company.
+```javascript
+describe("GET /companies/:handle", function () {
+  test("works for anon", async function () {
+    const resp = await request(app).get(`/companies/c1`);
+    expect(resp.body).toEqual({
+      company: {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    });
+  });
+
+  test("works for anon: company w/o jobs", async function () {
+    const resp = await request(app).get(`/companies/c2`);
+    expect(resp.body).toEqual({
+      company: {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+    });
+  });
+
+  test("not found for no such company", async function () {
+    const resp = await request(app).get(`/companies/nope`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+```
+
+5. Test Suite: `PATCH /companies/:handle`
+- Test for Successful Update:
+  - Verifies that a company's data can be updated.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Non-Existent Company:
+  - Verifies that a 404 status code is returned for a non-existent company.
+- Test for Invalid Handle Change:
+  - Verifies that a 400 status code is returned for an invalid handle change.
+- Test for Invalid Data:
+  - Verifies that a 400 status code is returned for invalid data.
+```javascript
+describe("PATCH /companies/:handle", function () {
+  test("works for users", async function () {
+    const resp = await request(app)
+        .patch(`/companies/c1`)
+        .send({
+          name: "C1-new",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      company: {
+        handle: "c1",
+        name: "C1-new",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .patch(`/companies/c1`)
+        .send({
+          name: "C1-new",
+        });
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found on no such company", async function () {
+    const resp = await request(app)
+        .patch(`/companies/nope`)
+        .send({
+          name: "new nope",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request on handle change attempt", async function () {
+    const resp = await request(app)
+        .patch(`/companies/c1`)
+        .send({
+          handle: "c1-new",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request on invalid data", async function () {
+    const resp = await request(app)
+        .patch(`/companies/c1`)
+        .send({
+          logoUrl: "not-a-url",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+});
+```
+
+6. Test Suite: `DELETE /companies/:handle`
+- Test for Successful Deletion:
+  - Verifies that a company can be deleted.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Non-Existent Company:
+  - Verifies that a 404 status code is returned for a non-existent company.
+```javascript
+describe("DELETE /companies/:handle", function () {
+  test("works for users", async function () {
+    const resp = await request(app)
+        .delete(`/companies/c1`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ deleted: "c1" });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .delete(`/companies/c1`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found for no such company", async function () {
+    const resp = await request(app)
+        .delete(`/companies/nope`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+```
+
+7. Understanding `beforeEach` and `afterEach`
+In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+
+- `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
+  - In this file, `commonBeforeEach` starts a new database transaction before each test.
+- `afterEach`: Runs a specific piece of code after each test case. This is useful for cleaning up after each test to ensure tests do not affect each other.
+  - In this file, `commonAfterEach` rolls back the database transaction after each test.
+
+8. Running Tests with Coverage and the `-i` Flag
+To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+```javascript
+jest --coverage -i
+```
+- `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
+- `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
+
+
+##### routes (folder) / `users.js` and `users.test.js` explained
+
+###### `users.js`explained
+
+This file contains the routes for handling user-related operations in the Jobly application.
+
+1. Imports and Setup
+- `jsonschema`: Library for validating JSON objects against a schema.
+- `express`: The main framework used to build the web server.
+- `ensureLoggedIn`: Middleware to ensure the user is logged in.
+- `BadRequestError`: Custom error class for handling bad requests.
+- `User`: The `User` model for interacting with the `users` table.
+- `createToken`: Function to create JSON Web Tokens (JWT).
+- `userNewSchema`, `userUpdateSchema`: JSON schemas for validating user data.
+```javascript
+"use strict";
+
+const jsonschema = require("jsonschema");
+const express = require("express");
+const { ensureLoggedIn } = require("../middleware/auth");
+const { BadRequestError } = require("../expressError");
+const User = require("../models/user");
+const { createToken } = require("../helpers/tokens");
+const userNewSchema = require("../schemas/userNew.json");
+const userUpdateSchema = require("../schemas/userUpdate.json");
+
+const router = express.Router();
+```
+
+2. Route: `POST /users`
+- Validates the request body against the `userNewSchema`.
+- Registers a new user with the provided data.
+- Creates a JWT token for the new user.
+- Returns the new user and token in the response.
+```javascript
+router.post("/", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, userNewSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const user = await User.register(req.body);
+    const token = createToken(user);
+    return res.status(201).json({ user, token });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+3. Route: `GET /users`
+  - Retrieves all users from the database.
+  - Returns the list of users in the response.
+```javascript
+router.get("/", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const users = await User.findAll();
+    return res.json({ users });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+4. Route: `GET /users/:username`
+- Retrieves a user by their username.
+- Returns the user data in the response.
+```javascript
+router.get("/:username", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const user = await User.get(req.params.username);
+    return res.json({ user });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+5. Route: `PATCH /users/:username`
+- Validates the request body against the userUpdateSchema.
+- Updates the user data with the provided fields.
+- Returns the updated user data in the response.
+```javascript
+router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, userUpdateSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const user = await User.update(req.params.username, req.body);
+    return res.json({ user });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+6. Route: `DELETE /users/:username`
+- Deletes a user by their username.
+- Returns a confirmation message in the response.
+```javascript
+router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
+  try {
+    await User.remove(req.params.username);
+    return res.json({ deleted: req.params.username });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+7. Export the Router:
+```javascript
+module.exports = router;
+```
+
+###### `users.test.js`explained
+
+This file contains tests for the user routes using the `jest` testing framework.
+- `request`: Library for testing HTTP requests.
+- `db`: Database connection.
+- `app`: The Express application.
+- `User`: The `User` model.
+- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
+u1Token: JWT token for user u1.
+
+1. Imports and Setup:
+```javascript
+"use strict";
+
+const request = require("supertest");
+
+const db = require("../db.js");
+const app = require("../app");
+const User = require("../models/user");
+
+const {
+  commonBeforeAll,
+  commonBeforeEach,
+  commonAfterEach,
+  commonAfterAll,
+  u1Token,
+} = require("./_testCommon");
+
+beforeAll(commonBeforeAll);
+beforeEach(commonBeforeEach);
+afterEach(commonAfterEach);
+afterAll(commonAfterAll);
+```
+
+2. Test Suite: `POST /users`
+- Test for Successful Creation (Non-Admin):
+  - Verifies that a new non-admin user can be created.
+- Test for Successful Creation (Admin):
+  - Verifies that a new admin user can be created.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Missing Data:
+  - Verifies that a 400 status code is returned for missing data.
+- Test for Invalid Data:
+  - Verifies that a 400 status code is returned for invalid data.
+```javascript
+describe("POST /users", function () {
+  test("works for users: create non-admin", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-new",
+          firstName: "First-new",
+          lastName: "Last-newL",
+          password: "password-new",
+          email: "new@email.com",
+          isAdmin: false,
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        email: "new@email.com",
+        isAdmin: false,
+      }, token: expect.any(String),
+    });
+  });
+
+  test("works for users: create admin", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-new",
+          firstName: "First-new",
+          lastName: "Last-newL",
+          password: "password-new",
+          email: "new@email.com",
+          isAdmin: true,
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        email: "new@email.com",
+        isAdmin: true,
+      }, token: expect.any(String),
+    });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-new",
+          firstName: "First-new",
+          lastName: "Last-newL",
+          password: "password-new",
+          email: "new@email.com",
+          isAdmin: true,
+        });
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("bad request if missing data", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-new",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request if invalid data", async function () {
+    const resp = await request(app)
+        .post("/users")
+        .send({
+          username: "u-new",
+          firstName: "First-new",
+          lastName: "Last-newL",
+          password: "password-new",
+          email: "not-an-email",
+          isAdmin: true,
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+});
+```
+
+3. Test Suite: `GET /users`
+- Test for Retrieving All Users:
+  - Verifies that all users can be retrieved.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Error Handling:
+  - Verifies that a 500 status code is returned when an error occurs.
+```javascript
+describe("GET /users", function () {
+  test("works for users", async function () {
+    const resp = await request(app)
+        .get("/users")
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      users: [
+        {
+          username: "u1",
+          firstName: "U1F",
+          lastName: "U1L",
+          email: "user1@user.com",
+          isAdmin: false,
+        },
+        {
+          username: "u2",
+          firstName: "U2F",
+          lastName: "U2L",
+          email: "user2@user.com",
+          isAdmin: false,
+        },
+        {
+          username: "u3",
+          firstName: "U3F",
+          lastName: "U3L",
+          email: "user3@user.com",
+          isAdmin: false,
+        },
+      ],
+    });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .get("/users");
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("fails: test next() handler", async function () {
+    await db.query("DROP TABLE users CASCADE");
+    const resp = await request(app)
+        .get("/users")
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(500);
+  });
+});
+```
+
+4. Test Suite: `GET /users/:username`
+- Test for Retrieving a User:
+  - Verifies that a user can be retrieved by their username.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Non-Existent User:
+  - Verifies that a 404 status code is returned for a non-existent user.
+```javascript
+describe("GET /users/:username", function () {
+  test("works for users", async function () {
+    const resp = await request(app)
+        .get(`/users/u1`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .get(`/users/u1`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found if user not found", async function () {
+    const resp = await request(app)
+        .get(`/users/nope`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+```
+
+5. Test Suite: `PATCH /users/:username`
+- Test for Successful Update:
+  - Verifies that a user's data can be updated.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Non-Existent User:
+  - Verifies that a 404 status code is returned for a non-existent user.
+- Test for Invalid Data:
+  - Verifies that a 400 status code is returned for invalid data.
+- Test for Updating Password:
+  - Verifies that a user's password can be updated.
+```javascript
+describe("PATCH /users/:username", () => {
+  test("works for users", async function () {
+    const resp = await request(app)
+        .patch(`/users/u1`)
+        .send({
+          firstName: "New",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "New",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .patch(`/users/u1`)
+        .send({
+          firstName: "New",
+        });
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found if no such user", async function () {
+    const resp = await request(app)
+        .patch(`/users/nope`)
+        .send({
+          firstName: "Nope",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request if invalid data", async function () {
+    const resp = await request(app)
+        .patch(`/users/u1`)
+        .send({
+          firstName: 42,
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("works: set new password", async function () {
+    const resp = await request(app)
+        .patch(`/users/u1`)
+        .send({
+          password: "new-password",
+        })
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+      },
+    });
+    const isSuccessful = await User.authenticate("u1", "new-password");
+    expect(isSuccessful).toBeTruthy();
+  });
+});
+```
+
+6. Test Suite: `DELETE /users/:username`
+- Test for Successful Deletion:
+  - Verifies that a user can be deleted.
+- Test for Unauthorized Access:
+  - Verifies that a 401 status code is returned for unauthorized access.
+- Test for Non-Existent User:
+  - Verifies that a 404 status code is returned for a non-existent user.
+```javascript
+describe("DELETE /users/:username", function () {
+  test("works for users", async function () {
+    const resp = await request(app)
+        .delete(`/users/u1`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ deleted: "u1" });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .delete(`/users/u1`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found if user missing", async function () {
+    const resp = await request(app)
+        .delete(`/users/nope`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+```
+
+7. Understanding `beforeEach` and `afterEach`
+In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+
+- `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
+  - In this file, `commonBeforeEach` starts a new database transaction before each test.
+- `afterEach`: Runs a specific piece of code after each test case. This is useful for cleaning up after each test to ensure tests do not affect each other.
+  - In this file, `commonAfterEach` rolls back the database transaction after each test.
+
+8. Running Tests with Coverage and the `-i` Flag
+To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+```javascript
+jest --coverage -i
+```
+- `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
+- `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
+---
+---
 ---
 
 #### First Task: sqlForPartialUpdate
