@@ -1,5 +1,7 @@
 # `routes` folder file notes/explanations/diagrams
 
+Postman workspace located here: `https://winter-shadow-436327.postman.co/workspace/New-Team-Workspace~6f9d5494-beb9-4808-bfe5-ae04abd3e5e0/request/11268906-f9793f48-b6e2-49a2-a7eb-d5759b0e9726?action=share&creator=11268906&ctx=documentation`
+
 ## Table of Contents
 
 - [routes folder file notes/explanations/diagrams](#routes-folder-file-notesexplanationsdiagrams)
