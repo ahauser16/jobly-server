@@ -108,6 +108,132 @@ describe("GET /companies", function () {
   });
 });
 
+/************************************** GET /companies with filters */
+
+describe("GET /companies with filters", function () {
+  test("works: no filters", async function () {
+    const resp = await request(app).get("/companies");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
+    });
+  });
+
+  test("works: minEmployees filter", async function () {
+    const resp = await request(app).get("/companies?minEmployees=2");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
+    });
+  });
+
+  test("works: maxEmployees filter", async function () {
+    const resp = await request(app).get("/companies?maxEmployees=2");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+      ],
+    });
+  });
+
+  test("works: nameLike filter", async function () {
+    const resp = await request(app).get("/companies?nameLike=c1");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+      ],
+    });
+  });
+
+  test("works: multiple filters", async function () {
+    const resp = await request(app).get("/companies?minEmployees=2&maxEmployees=3&nameLike=c3");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
+    });
+  });
+
+  test("fails: invalid filter range", async function () {
+    const resp = await request(app).get("/companies?minEmployees=5&maxEmployees=3");
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual("minEmployees cannot be greater than maxEmployees.");
+  });
+
+  test("works: no results for filters", async function () {
+    const resp = await request(app).get("/companies?minEmployees=10");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({ companies: [] });
+  });
+});
+
+
+
 /************************************** GET /companies/:handle */
 
 describe("GET /companies/:handle", function () {

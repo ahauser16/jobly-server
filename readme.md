@@ -199,7 +199,7 @@ Remember to Replace `your_username` with your PostgreSQL username. You may be pr
 - [x] After completing these steps, you should have both the `jobly` and `jobly_test` databases set up with the necessary schema and initial data.
 
 
-Read the tests and get an (I) understanding of what the (II) **_beforeEach_** and **_afterEach_** methods are specifically doing for our tests.
+- [x] Read the tests and get an (I) understanding of what the (II) **_beforeEach_** and **_afterEach_** methods are specifically doing for our tests.
 
 (III) Run our tests, with coverage. Any time you run our tests here, you will need to use the `-i` flag for Jest, so that the tests run “in band” (in order, not at the same time).
 
@@ -548,7 +548,7 @@ jest --coverage -i
 
 A starting piece to document and test:
 
-We’ve provided a useful method in **_helpers/sql.js_** called **_sqlForPartialUpdate_**. This code works, and we use it, but the code is undocumented and not directly tested. Write unit tests for this, and thoroughly document the function.
+- [x] We’ve provided a useful method in **_helpers/sql.js_** called **_sqlForPartialUpdate_**. This code works, and we use it, but the code is undocumented and not directly tested. Write unit tests for this, and thoroughly document the function.
 
 [Back to TOC](#jobly-table-of-contents)
 
@@ -571,8 +571,386 @@ The route for listing all companies (**_GET /companies_**) works, but it current
 - Do not solve this by issuing a more complex SELECT statement than is needed (for example, if the user isn’t filtering by **_minEmployees_** or **_maxEmployees_**, the SELECT statement should not include anything about the **_num_employees_**.
 - Validate that the request does not contain inappropriate other filtering fields in the route. Do the actual filtering in the model.
 - Write unit tests for the model that exercise this in different ways, so you can be assured different combinations of filtering will work.
-  Write tests for the route that will ensure that it correctly validates the incoming request and uses the model method properly.
+- Write tests for the route that will ensure that it correctly validates the incoming request and uses the model method properly.
 - Document all new code here clearly; this is functionality that future team members should be able to understand how to use from your docstrings.
+
+#### Filter Feature Refactor Plan
+
+1. Update `GET /companies` Route in `companies.js`
+- [x] Validate incoming query parameters (e.g., `minEmployees`, `maxEmployees`, `nameLike`).
+- [x] Ensure `minEmployees` is not greater than `maxEmployees`, and return a `400` error if so.
+- [x] Pass the valid filters to the `Company.findAll` model method.
+2. Update the `Company.findAll` Model Method
+- [x] Add logic to `Company.findAll` to dynamically filter the companies based on the provided parameters.
+- [x] Ensure only relevant filters are applied in the query.
+3. Test the Implementation
+- Write tests to cover various filter combinations in both the route and the model.
+  - [x] `models/company.test.js` should test the filtering logic directly in the model's `findAll` method to ensure filters work independently of the API layer.
+  - [x] `routes/companies.test.js` should test the integration of query parameters in the API route and verify that it correctly utilizes the `findAll` method in the model.
+
+NB remember to restart the server before testing the refactored route.
+
+##### 1. Update `GET /companies` Route in `companies.js`
+```javascript
+/** GET / =>
+ *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
+ *
+ * Can filter on provided search filters:
+ * - minEmployees: Minimum number of employees
+ * - maxEmployees: Maximum number of employees
+ * - nameLike: Case-insensitive, partial match for company name
+ *
+ * Authorization required: none
+ */
+
+router.get("/", async function (req, res, next) {
+  try {
+    // Extract query parameters
+    const { minEmployees, maxEmployees, nameLike } = req.query;
+
+    // Validate numeric filters
+    if (minEmployees !== undefined && maxEmployees !== undefined) {
+      const min = parseInt(minEmployees);
+      const max = parseInt(maxEmployees);
+      if (min > max) {
+        throw new BadRequestError("minEmployees cannot be greater than maxEmployees.");
+      }
+    }
+
+    // Pass valid filters to the model
+    const filters = { minEmployees, maxEmployees, nameLike };
+    const companies = await Company.findAll(filters);
+
+    return res.json({ companies });
+  } catch (err) {
+    return next(err);
+  }
+});
+```
+
+##### 2. Update the `Company.findAll` Model Method
+
+Modify the `Company.findAll` method in the `models/company.js` file to apply dynamic filtering.
+```javascript
+/** Find all companies with optional filtering.
+ *
+ * Accepts a `filters` object with the following keys:
+ * - minEmployees: Minimum number of employees (integer)
+ * - maxEmployees: Maximum number of employees (integer)
+ * - nameLike: Case-insensitive partial string match for company name
+ *
+ * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+ */
+
+static async findAll(filters = {}) {
+  let query = `SELECT handle,
+                      name,
+                      description,
+                      num_employees AS "numEmployees",
+                      logo_url AS "logoUrl"
+               FROM companies`;
+  const whereClauses = [];
+  const values = [];
+
+  // Apply filters dynamically
+  const { minEmployees, maxEmployees, nameLike } = filters;
+
+  if (minEmployees !== undefined) {
+    values.push(minEmployees);
+    whereClauses.push(`num_employees >= $${values.length}`);
+  }
+
+  if (maxEmployees !== undefined) {
+    values.push(maxEmployees);
+    whereClauses.push(`num_employees <= $${values.length}`);
+  }
+
+  if (nameLike !== undefined) {
+    values.push(`%${nameLike}%`);
+    whereClauses.push(`name ILIKE $${values.length}`);
+  }
+
+  // Append WHERE clause if filters exist
+  if (whereClauses.length > 0) {
+    query += " WHERE " + whereClauses.join(" AND ");
+  }
+
+  // Add ordering
+  query += " ORDER BY name";
+
+  // Execute query
+  const result = await db.query(query, values);
+  return result.rows;
+}
+```
+
+##### 3. Test the Implementation
+To thoroughly test the new filtering feature, you should add tests to both the `routes/companies.test.js` and `models/company.test.js` files:
+
+1. `models/company.test.js` should test the filtering logic directly in the model's `findAll` method to ensure filters work independently of the API layer.
+2. `routes/companies.test.js` should test the integration of query parameters in the API route and verify that it correctly utilizes the `findAll` method in the model.
+
+###### 1. Refactor: `models/company.test.js`
+Add new test cases for the `findAll` method with various filter scenarios:
+- Verifies that the filtering logic in the `findAll` model works independently.
+- Ensures the database query behaves as expected for each filter.
+```javascript
+/************************************** findAll with filters */
+
+describe("findAll with filters", function () {
+  test("works: no filters", async function () {
+    let companies = await Company.findAll();
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: minEmployees filter", async function () {
+    let companies = await Company.findAll({ minEmployees: 2 });
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: maxEmployees filter", async function () {
+    let companies = await Company.findAll({ maxEmployees: 2 });
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+    ]);
+  });
+
+  test("works: nameLike filter", async function () {
+    let companies = await Company.findAll({ nameLike: "C" });
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: multiple filters", async function () {
+    let companies = await Company.findAll({ minEmployees: 2, maxEmployees: 3, nameLike: "3" });
+    expect(companies).toEqual([
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("returns empty if no match", async function () {
+    let companies = await Company.findAll({ minEmployees: 10 });
+    expect(companies).toEqual([]);
+  });
+
+  test("throws error on invalid filter range", async function () {
+    try {
+      await Company.findAll({ minEmployees: 5, maxEmployees: 3 });
+      fail();
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+});
+```
+
+###### 2. Refactor: `routes/companies.test.js`
+Add tests to the `GET /companies` route to verify that filters are applied correctly:
+- Tests the integration of query parameters in the route.
+- Ensures that the API correctly validates inputs, handles errors, and delegates filtering to the model.
+```javascript
+/************************************** GET /companies with filters */
+
+describe("GET /companies with filters", function () {
+  test("works: no filters", async function () {
+    const resp = await request(app).get("/companies");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
+    });
+  });
+
+  test("works: minEmployees filter", async function () {
+    const resp = await request(app).get("/companies?minEmployees=2");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
+    });
+  });
+
+  test("works: maxEmployees filter", async function () {
+    const resp = await request(app).get("/companies?maxEmployees=2");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+      ],
+    });
+  });
+
+  test("works: nameLike filter", async function () {
+    const resp = await request(app).get("/companies?nameLike=c1");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+      ],
+    });
+  });
+
+  test("works: multiple filters", async function () {
+    const resp = await request(app).get("/companies?minEmployees=2&maxEmployees=3&nameLike=c3");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
+    });
+  });
+
+  test("fails: invalid filter range", async function () {
+    const resp = await request(app).get("/companies?minEmployees=5&maxEmployees=3");
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual("minEmployees cannot be greater than maxEmployees.");
+  });
+
+  test("works: no results for filters", async function () {
+    const resp = await request(app).get("/companies?minEmployees=10");
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({ companies: [] });
+  });
+});
+
+```
 
 [Back to TOC](#jobly-table-of-contents)
 

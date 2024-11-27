@@ -5,11 +5,24 @@ Postman workspace located here: `https://winter-shadow-436327.postman.co/workspa
 ## Table of Contents
 
 - [routes folder file notes/explanations/diagrams](#routes-folder-file-notesexplanationsdiagrams)
+  - [Postman Notes](#postman-notes)
+    - [Registeration of New User](#registeration-of-new-user)
+    - [Authentication of Registered User](#authentication-of-registered-user)
+    - [User-Add New User-Request Sent By Admin](#user-add-new-user-request-sent-by-admin)
+    - [User-Retrieve All Users](#user-retrieve-all-users)
+    - [User-Retrieve User By Username](#user-retrieve-user-by-username)
+    - [User-Update User Data By Username](#user-update-user-data-by-username)
+    - [User-Delete User Data By Username](#user-delete-user-data-by-username)
+    - [Company-Add New](#company-add-new)
+    - [Company-Retrieve All Companies](#company-retrieve-all-companies)
+    - [Company-Retrieve Company By Handle](#company-retrieve-company-by-handle)
+    - [Company-Update Company Data By Handle](#company-update-company-data-by-handle)
+    - [Company-Delete Company By Handle](#delete-company-by-company-handle)
   - [Tests](#tests)
-  - [_testCommon.js](#_testcommonjs)
-    - [_testCommon.js diagram](#_testcommonjs-diagram)
-    - [_testCommon.js diagram explanation](#_testcommonjs-diagram-explanation)
-    - [_testCommon.js code overview](#_testcommonjs-code-overview)
+  - [\_testCommon.js](#_testcommonjs)
+    - [\_testCommon.js diagram](#_testcommonjs-diagram)
+    - [\_testCommon.js diagram explanation](#_testcommonjs-diagram-explanation)
+    - [\_testCommon.js code overview](#_testcommonjs-code-overview)
   - [auth.test.js](#authtestjs)
     - [auth.test.js sequence diagram](#authtestjs-sequence-diagram)
     - [auth.test.js diagram explanation](#authtestjs-diagram-explanation)
@@ -17,11 +30,11 @@ Postman workspace located here: `https://winter-shadow-436327.postman.co/workspa
   - [companies.test.js](#companiestestjs)
     - [companies.test.js diagram](#companiestestjs-diagram)
     - [companies.test.js diagram explanation](#companiestestjs-diagram-explanation)
-    - [companies.test.js code overview](#companiestestjs-code-overview) 
+    - [companies.test.js code overview](#companiestestjs-code-overview)
   - [users.test.js](#userstestjs)
     - [users.test.js diagram](#userstestjs-diagram)
     - [users.test.js diagram explanation](#userstestjs-diagram-explanation)
-    - [users.test.js Code Overview](#userstestjs-code-overview) 
+    - [users.test.js Code Overview](#userstestjs-code-overview)
   - [Scripts](#scripts)
   - [auth.js](#authjs)
     - [auth.js sequence diagram](#authjs-sequence-diagram)
@@ -31,17 +44,354 @@ Postman workspace located here: `https://winter-shadow-436327.postman.co/workspa
     - [companies.js sequence diagram](#companiesjs-sequence-diagram)
     - [companies.js diagram explanation](#companiesjs-diagram-explanation)
     - [companies.js Code Overview](#companiesjs-code-overview)
-  - [users.js](#usersjs) 
-    - [users.js sequence diagram](#usersjs-sequence-diagram) 
-    - [users.js diagram explanation](#usersjs-diagram-explanation) 
+  - [users.js](#usersjs)
+    - [users.js sequence diagram](#usersjs-sequence-diagram)
+    - [users.js diagram explanation](#usersjs-diagram-explanation)
     - [users.js code overview](#usersjs-code-overview)
 
 ### Tests
 
-### _testCommon.js
+### Postman Notes
+
+The `jobly` database has the test user account `username: newuser5000` with `password: password123abc` which was created to test the `http://localhost:3001/auth/register` route that (1) registers a new user and (2) returns a JWT token and then used to test the `http://localhost:3001/auth/token` route that (1) authenticates a registered user and (2) returns a JWT token. The full json body of each Postman request that initially registered and authenticated "newuser5000" as well as the token created during registeration and authentication.
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### Registeration of New User
+`POST /auth/register:   { user } => { token }`
+- user must include { username, password, firstName, lastName, email }
+- Returns JWT token which can be used to authenticate further requests.
+- Authorization required: none
+
+json body associated with Postman request: `http://localhost:3001/auth/register`
+```json
+{
+  "username": "newuser5000",
+  "password": "password123abc",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "jdoe@example.com"
+}
+```
+
+json token generated from Postman request: `http://localhost:3001/auth/register`
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI1MDAwIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMjY0MDYwMX0.1dWhBf67W-Co7zvlIUcfqnPPJYjJOnk7y-NC7oloBls"
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### Authentication of Registered User
+`POST /auth/token:  { username, password } => { token }`
+- Returns JWT token which can be used to authenticate further requests.
+- Authorization required: none
+
+json body associated with Postman request: `http://localhost:3001/auth/token`
+```json
+{
+  "username": "newuser5000",
+  "password": "password123abc"
+}
+```
+
+json token generated from Postman request: `http://localhost:3001/auth/token`
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI1MDAwIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMjY0MDkzMn0.WK6UEUWQshznsM9s_f5Q5Nk9pXyiXqikC71nZp_RW9c"
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### User-Add New User-Request Sent By Admin
+
+`POST / { user }  => { user, token }`
+
+- Authorization required: login
+- Adds a new user, however, this is not the registration endpoint. Instead, this route is only for admin users to add new users. The new user being added can be an admin. This returns the newly created user and an authentication token (see below).
+
+example of json body:
+
+```json
+{
+  "username": "newuser7000",
+  "password": "newpassword123abc",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "email": "janedoe@example.com",
+  "isAdmin": true
+}
+```
+
+example of json response
+
+```json
+{
+  "user": {
+    "username": "newuser7000",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "janedoe@example.com",
+    "isAdmin": true
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI3MDAwIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzMyNjY0NDA0fQ.l78XK8H9jxoQ_oAu5-0jlHiAYtS6tfTtx0BzYXSmgRE"
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### User-Retrieve All Users
+`GET / => { users: [ {username, firstName, lastName, email }, ... ] }`
+- Returns list of all users.
+- Authorization required: login
+
+I successfully sent a GET request to the `http://localhost:3001/users` route using the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the json response is below.
+
+json response example:
+```json
+{
+    "users": [
+        {
+            "username": "newuser",
+            "firstName": "New",
+            "lastName": "User",
+            "email": "newuser@example.com",
+            "isAdmin": false
+        },
+        {
+            "username": "newuser5000",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "jdoe@example.com",
+            "isAdmin": false
+        },
+        {
+            "username": "newuser7000",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "janedoe@example.com",
+            "isAdmin": true
+        },
+        {
+            "username": "testadmin",
+            "firstName": "Test",
+            "lastName": "Admin!",
+            "email": "joel@joelburton.com",
+            "isAdmin": true
+        },
+        {
+            "username": "testuser",
+            "firstName": "Test",
+            "lastName": "User",
+            "email": "joel@joelburton.com",
+            "isAdmin": false
+        }
+    ]
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### User-Retrieve User By Username
+`GET /[username] => { user }`
+ - Returns `{ username, firstName, lastName, isAdmin }`
+ - Authorization required: login
+
+I successfully made a Postman GET request to `http://localhost:3001/users` that queried the dataset for the user name "newuser5000" and the final query URL is: `http://localhost:3001/users/newuser5000`.  I used the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the json response is below.
+
+example of response:
+```json
+{
+    "user": {
+        "username": "newuser5000",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "jdoe@example.com",
+        "isAdmin": false
+    }
+}
+```
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### User-Update User Data By Username
+`PATCH /[username] { user } => { user }`
+- Data can include: `{ firstName, lastName, password, email }`
+- Returns `{ username, firstName, lastName, email, isAdmin }`
+- Authorization required: login
+ 
+I successfully made a Postman PATCH request to `http://localhost:3001/users` that queried the dataset for the user name "newuser5000", updated that user's `firstName`, `lastName` and `email` and so the final query URL is: `http://localhost:3001/users/newuser5000`.  I used the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the json body for the request and the response is below.
+
+example of json body for the request:
+```json
+{
+    "firstName": "UpdatedFirstName",
+    "lastName": "UpdatedLastName",
+    "email": "updated@example.com"
+}
+```
+
+example of json response:
+```json
+{
+    "user": {
+        "username": "newuser5000",
+        "firstName": "UpdatedFirstName",
+        "lastName": "UpdatedLastName",
+        "email": "updated@example.com",
+        "isAdmin": false
+    }
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+---
+#### User-Delete User Data By Username
+`DELETE /[username]  =>  { deleted: username }`
+- Authorization required: login
+I successfully made a Postman DELETE request to `http://localhost:3001/users` that queried the dataset for the user name "newuser7000", deleted that user and so the final query URL is: `http://localhost:3001/users/newuser7000`.  I used the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the  response is below.
+
+example of body of request:
+```json
+{
+    "deleted": "newuser7000"
+}
+```
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+
+---
+#### Company-Add New
+`POST / { company } =>  { company }`
+- company should be `{ handle, name, description, numEmployees, logoUrl }`
+- Returns `{ handle, name, description, numEmployees, logoUrl }`
+- Authorization required: login
+
+I successfully sent a POST request to the `http://localhost:3001/companies` route using the same `Authorization` value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in. The json body and json response is below with the test company information. Keep in mind this "exampleco" is the default company handle to delete in the DELETE Company By Handle route [below](#delete-company-by-company-handle)
+
+json body associated with Postman request: `http://localhost:3001/companies`
+
+```json
+{
+  "handle": "exampleco",
+  "name": "Example Company",
+  "description": "This is an example company.",
+  "numEmployees": 100,
+  "logoUrl": "http://example.com/logo.png"
+}
+```
+
+json token generated from Postman request: `http://localhost:3001/auth/token`
+
+```json
+{
+  "company": {
+    "handle": "exampleco",
+    "name": "Example Company",
+    "description": "This is an example company.",
+    "numEmployees": 100,
+    "logoUrl": "http://example.com/logo.png"
+  }
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### Company-Retrieve All Companies
+`GET / => { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }`
+- Can filter on provided search filters:
+  - `minEmployees`
+  - `maxEmployees`
+  - `nameLike` (will find case-insensitive, partial matches)
+- Authorization required: none
+ 
+I successfully sent a GET request to the `http://localhost:3001/companies` route and added logic to the `companies.js` route and `company.js` model that allows filtering using the `minEMployees`, `nameLike` and `maxEmployees` params in Postman. The following example queries the API dataset for a company's name that contains the term "hall" and has between 700 and 750 employees `http://localhost:3001/companies?minEmployees=700&nameLike=hall&maxEmployees=750`. The user was not required to be logged in to make this request.
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### Company-Retrieve Company By Handle
+`GET /[handle]  =>  { company }`
+- Company is `{ handle, name, description, numEmployees, logoUrl, jobs }` where jobs is `[{ id, title, salary, equity }, ...]`
+- Authorization required: none
+
+I successfully sent a GET request to the `http://localhost:3001/companies` route to search for a company with the `handle` value of "hall-davis" so the complete URL of the request is `http://localhost:3001/companies/hall-davis`. An example of the json response is below. The user was not required to be logged in to make this request.
+
+example response from GET request
+
+```json
+{
+  "company": {
+    "handle": "hall-davis",
+    "name": "Hall-Davis",
+    "description": "Adult go economic off into. Suddenly happy according only common. Father plant wrong free traditional.",
+    "numEmployees": 749,
+    "logoUrl": "/logos/logo2.png"
+  }
+}
+```
+
+example response from DELETE request
+
+```json
+{
+  "deleted": "exampleco"
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### Company-Update Company Data By Handle
+`PATCH /[handle] { fld1, fld2, ... } => { company }`
+- Patches company data.
+- fields can be: `{ name, description, numEmployees, logo_url }`
+- Returns `{ handle, name, description, numEmployees, logo_url }`
+- Authorization required: login
+
+I successfully sent a PATCH request to the `http://localhost:3001/companies` route to update the company with the `handle` value of "hall-davis" so the complete URL of the request is `http://localhost:3001/companies/hall-davis`. The request included the `json` body below and required the user to be logged in so I used the same token value as the initial registration/authentication of the user below. An example of the json response is below.
+
+**`Content-Type`**: `application/json`
+**`Authentication` header value**: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI1MDAwIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMjY0MDkzMn0.WK6UEUWQshznsM9s_f5Q5Nk9pXyiXqikC71nZp_RW9c`
+
+**example response from request**
+
+```json
+{
+  "company": {
+    "handle": "hall-davis",
+    "name": "hall-davis Updated",
+    "description": "Updated description for the company.",
+    "numEmployees": 200,
+    "logoUrl": "http://example.com/newlogo.png"
+  }
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### Company-Delete Company By Handle
+`DELETE /[handle]  =>  { deleted: handle }`
+- Authorization: login
+I successfully sent a DELETE request to the `http://localhost:3001/companies` route to delete the company with the `handle` value of "exampleco" so the complete URL of the request is `http://localhost:3001/companies/exampleco`. The request required the user to be logged in so I used the same token value as the initial registration/authentication of the user below. An example of the json response is below.
+
+example of company response:
+
+```json
+{
+  "deleted": "exampleco"
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+### \_testCommon.js
+
 This file contains common setup and teardown functions for tests in the routes folder. These functions help ensure that the database is in a consistent state before and after each test.
 
-#### _testCommon.js diagram
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### \_testCommon.js diagram
 
 ```mermaid
 sequenceDiagram
@@ -92,7 +442,7 @@ sequenceDiagram
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-#### _testCommon.js diagram explanation
+#### \_testCommon.js diagram explanation
 
 1. Test Setup (`commonBeforeAll`):
 
@@ -128,13 +478,15 @@ The `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll` f
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-#### _testCommonjs code overview
+#### \_testCommonjs code overview
 
 1. Imports and Setup:
-- ``DB``: Database connection.
+
+- `DB`: Database connection.
 - `User`: The `User` model for interacting with the `users` table.
 - `Company`: The `Company` model for interacting with the `companies` table.
 - `createToken`: Function to create JSON Web Tokens (JWT).
+
 ```javascript
 "use strict";
 
@@ -144,11 +496,13 @@ const Company = require("../models/company");
 const { createToken } = require("../helpers/tokens");
 ```
 
-2. Function: ``commonBeforeAll``
+2. Function: `commonBeforeAll`
+
 - This function runs once before all tests. It:
   - Deletes all records from the `users` and `companies` tables.
   - Inserts sample data into the `companies` table.
   - Registers sample users with hashed passwords.
+
 ```javascript
 async function `commonBeforeAll`() {
   // noinspection SqlWithoutWhere
@@ -210,6 +564,7 @@ async function `commonBeforeAll`() {
 
 3. Function: `commonBeforeEach`
    - This function runs before each test. It starts a new database transaction.
+
 ```javascript
 async function commonBeforeEach() {
   await `DB`.query("BEGIN");
@@ -217,7 +572,8 @@ async function commonBeforeEach() {
 ```
 
 4. Function: `commonAfterEach`
-This function runs after each test. It rolls back the database transaction, ensuring that any changes made during the test are not saved.
+   This function runs after each test. It rolls back the database transaction, ensuring that any changes made during the test are not saved.
+
 ```javascript
 async function commonAfterEach() {
   await `DB`.query("ROLLBACK");
@@ -226,6 +582,7 @@ async function commonAfterEach() {
 
 5. Function: `commonAfterAll`
    - This function runs once after all tests. It closes the database connection.
+
 ```javscript
 async function commonAfterAll() {
   await `DB`.end();
@@ -234,11 +591,13 @@ async function commonAfterAll() {
 
 6. Token for Testing:
    - Creates a JWT token for user `u1` to be used in tests.
+
 ```javascript
 const u1Token = createToken({ username: "u1", isAdmin: false });
 ```
 
 7. Export the Functions and Token:
+
 ```javascript
 module.exports = {
   `commonBeforeAll`,
@@ -250,7 +609,7 @@ module.exports = {
 ```
 
 8. Understanding `beforeEach` and `afterEach`
-In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+   In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
 
 - `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
   - In this file, `commonBeforeEach` starts a new database transaction before each test.
@@ -258,20 +617,20 @@ In the context of testing, `beforeEach` and `afterEach` are hooks provided by te
   - In this file, `commonAfterEach` rolls back the database transaction after each test.
 
 9. Running Tests with Coverage and the `-i` Flag
-To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+   To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+
 ```javascript
 jest --coverage -i'
 
 
 ```
+
 - `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
 - `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
 ### auth.test.js
-
-
 
 #### auth.test.js sequence diagram
 
@@ -341,6 +700,7 @@ sequenceDiagram
 
     Test->>DB: commonAfterAll() -> Close connection
 ```
+
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
 #### auth.test.js diagram explanation
@@ -423,11 +783,13 @@ Explanation of Each Step
 This file contains tests for the authentication routes using the `jest` testing framework.
 
 1. Imports and Setup
+
 - `request`: Library for testing HTTP requests.
 - `app`: The Express application.
-- ``commonBeforeAll``, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
+- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
 
 2. Test Suite: `POST /auth/token`
+
 - Test for Successful Token Generation:
   - Verifies that a token is generated for a valid username and password.
 - Test for Non-Existent User:
@@ -438,112 +800,99 @@ This file contains tests for the authentication routes using the `jest` testing 
   - Verifies that a 400 status code is returned for missing data.
 - Test for Invalid Data:
   - Verifies that a 400 status code is returned for invalid data.
+
 ```javascript
 describe("POST /auth/token", function () {
   test("works", async function () {
-    const resp = await request(app)
-        .post("/auth/token")
-        .send({
-          username: "u1",
-          password: "password1",
-        });
+    const resp = await request(app).post("/auth/token").send({
+      username: "u1",
+      password: "password1",
+    });
     expect(resp.body).toEqual({
-      "token": expect.any(String),
+      token: expect.any(String),
     });
   });
 
   test("unauth with non-existent user", async function () {
-    const resp = await request(app)
-        .post("/auth/token")
-        .send({
-          username: "no-such-user",
-          password: "password1",
-        });
+    const resp = await request(app).post("/auth/token").send({
+      username: "no-such-user",
+      password: "password1",
+    });
     expect(resp.statusCode).toEqual(401);
   });
 
   test("unauth with wrong password", async function () {
-    const resp = await request(app)
-        .post("/auth/token")
-        .send({
-          username: "u1",
-          password: "nope",
-        });
+    const resp = await request(app).post("/auth/token").send({
+      username: "u1",
+      password: "nope",
+    });
     expect(resp.statusCode).toEqual(401);
   });
 
   test("bad request with missing data", async function () {
-    const resp = await request(app)
-        .post("/auth/token")
-        .send({
-          username: "u1",
-        });
+    const resp = await request(app).post("/auth/token").send({
+      username: "u1",
+    });
     expect(resp.statusCode).toEqual(400);
   });
 
   test("bad request with invalid data", async function () {
-    const resp = await request(app)
-        .post("/auth/token")
-        .send({
-          username: 42,
-          password: "above-is-a-number",
-        });
+    const resp = await request(app).post("/auth/token").send({
+      username: 42,
+      password: "above-is-a-number",
+    });
     expect(resp.statusCode).toEqual(400);
   });
 });
 ```
 
 3. Test Suite: `POST /auth/register`
+
 - Test for Successful Registration:
   - Verifies that a new user can be registered and a token is generated.
 - Test for Missing Fields:
   - Verifies that a 400 status code is returned for missing fields.
 - Test for Invalid Data:
   - Verifies that a 400 status code is returned for invalid data.
+
 ```javascript
 describe("POST /auth/register", function () {
   test("works for anon", async function () {
-    const resp = await request(app)
-        .post("/auth/register")
-        .send({
-          username: "new",
-          firstName: "first",
-          lastName: "last",
-          password: "password",
-          email: "new@email.com",
-        });
+    const resp = await request(app).post("/auth/register").send({
+      username: "new",
+      firstName: "first",
+      lastName: "last",
+      password: "password",
+      email: "new@email.com",
+    });
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
-      "token": expect.any(String),
+      token: expect.any(String),
     });
   });
 
   test("bad request with missing fields", async function () {
-    const resp = await request(app)
-        .post("/auth/register")
-        .send({
-          username: "new",
-        });
+    const resp = await request(app).post("/auth/register").send({
+      username: "new",
+    });
     expect(resp.statusCode).toEqual(400);
   });
 
   test("bad request with invalid data", async function () {
-    const resp = await request(app)
-        .post("/auth/register")
-        .send({
-          username: "new",
-          firstName: "first",
-          lastName: "last",
-          password: "password",
-          email: "not-an-email",
-        });
+    const resp = await request(app).post("/auth/register").send({
+      username: "new",
+      firstName: "first",
+      lastName: "last",
+      password: "password",
+      email: "not-an-email",
+    });
     expect(resp.statusCode).toEqual(400);
   });
 });
 ```
 
 4. Understanding `beforeEach` and `afterEach`
-In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+   In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
 
 `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
 In this file, `commonBeforeEach` starts a new database transaction before each test.
@@ -551,10 +900,12 @@ In this file, `commonBeforeEach` starts a new database transaction before each t
 In this file, `commonAfterEach` rolls back the database transaction after each test.
 
 5. Running Tests with Coverage and the `-i` Flag
-To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+   To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+
 ```javascript
 jest --coverage -i
 ```
+
 - `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
 - `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
 
@@ -642,6 +993,7 @@ sequenceDiagram
 
     Test->>DB: commonAfterAll() -> Close connection
 ```
+
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
 #### companies.test.js diagram explanation
@@ -649,94 +1001,113 @@ sequenceDiagram
 **Explanation of Each Step**
 
 1. Test Setup (`commonBeforeAll`):
+
    - The test framework initiates the setup process by calling the `commonBeforeAll` function.
    - The `commonBeforeAll` function sends queries to the database (`DB`) to delete all records from the `users` and `companies` tables.
    - The `commonBeforeAll` function inserts sample data into the `companies` and `users` tables.
 
 2. Test Initialization (`commonBeforeEach`):
+
    - Before each test, the test framework calls the `commonBeforeEach` function.
    - The `commonBeforeEach` function sends a query to the database to begin a new transaction.
 
 3. Test Cleanup (`commonAfterEach`):
+
    - After each test, the test framework calls the `commonAfterEach` function.
    - The `commonAfterEach` function sends a query to the database to roll back the transaction, ensuring that any changes made during the test are not saved.
 
 4. Test Teardown (`commonAfterAll`):
+
    - After all tests have run, the test framework calls the `commonAfterAll` function.
    - The `commonAfterAll` function sends a query to the database to close the connection.
 
 5. Company Creation (`POST /companies`):
+
    - The test framework sends a POST request to the `/companies` endpoint with valid company data.
    - The application inserts the new company into the database and returns the company details.
    - The test framework verifies that the response contains the company details.
 
 6. Bad Request with Missing Data (`POST /companies`):
+
    - The test framework sends a POST request to the `/companies` endpoint with missing data.
    - The application returns a 400 Bad Request status.
    - The test framework verifies that the response status is 400.
 
 7. Bad Request with Invalid Data (`POST /companies`):
+
    - The test framework sends a POST request to the `/companies` endpoint with invalid data.
    - The application returns a 400 Bad Request status.
    - The test framework verifies that the response status is 400.
 
 8. Retrieve All Companies (`GET /companies`):
+
    - The test framework sends a GET request to the `/companies` endpoint.
    - The application retrieves all companies from the database and returns them.
    - The test framework verifies that the response contains the list of companies.
 
 9. Error Handling (`GET /companies`):
+
    - The test framework drops the `companies` table to simulate an error.
    - The test framework sends a GET request to the `/companies` endpoint.
    - The application returns a 500 Internal Server Error status.
    - The test framework verifies that the response status is 500.
 
 10. Retrieve Company by Handle (`GET /companies/:handle`):
+
     - The test framework sends a GET request to the `/companies/c1` endpoint.
     - The application retrieves the company details from the database and returns them.
     - The test framework verifies that the response contains the company details.
 
 11. Retrieve Company without Jobs (`GET /companies/:handle`):
+
     - The test framework sends a GET request to the `/companies/c2` endpoint.
     - The application retrieves the company details from the database and returns them.
     - The test framework verifies that the response contains the company details.
 
 12. Company Not Found (`GET /companies/:handle`):
+
     - The test framework sends a GET request to the /companies/nope endpoint.
     - The application returns a 404 Not Found status.
     - The test framework verifies that the response status is 404.
 
 13. Update Company (`PATCH /companies/:handle`):
+
     - The test framework sends a PATCH request to the `/companies/c1` endpoint with valid data.
     - The application updates the company details in the database and returns the updated details.
     - The test framework verifies that the response contains the updated company details.
 
 14. Unauthorized Update (`PATCH /companies/:handle`):
+
     - The test framework sends a PATCH request to the `/companies/c1` endpoint without authorization.
     - The application returns a 401 Unauthorized status.
     - The test framework verifies that the response status is 401.
 
 15. Company Not Found on Update (`PATCH /companies/:handle`):
+
     - The test framework sends a PATCH request to the `/companies/nope` endpoint.
     - The application returns a 404 Not Found status.
     - The test framework verifies that the response status is 404.
 
 16. Invalid Handle Change Attempt (`PATCH /companies/:handle`):
+
     - The test framework sends a PATCH request to the /companies/c1 endpoint with an attempt to change the handle.
     - The application returns a 400 Bad Request status.
     - The test framework verifies that the response status is 400.
 
 17. Invalid Data on Update (`PATCH /companies/:handle`):
+
     - The test framework sends a PATCH request to the `/companies/c1` endpoint with invalid data.
     - The application returns a 400 Bad Request status.
     - The test framework verifies that the response status is 400.
 
 18. Delete Company (`DELETE /companies/:handle`):
+
     - The test framework sends a DELETE request to the `/companies/c1` endpoint.
     - The application deletes the company from the database and returns a confirmation.
     - The test framework verifies that the response contains the deletion confirmation.
 
 19. Unauthorized Deletion (`DELETE /companies/:handle`):
+
     - The test framework sends a DELETE request to the `/companies/c1` endpoint without authorization.
     - The application returns a 401 Unauthorized status.
     - The test framework verifies that the response status is 401.
@@ -753,11 +1124,13 @@ sequenceDiagram
 This file contains tests for the company routes using the jest testing framework.
 
 1. Imports and Setup
+
 - `request`: Library for testing HTTP requests.
-- ``DB``: Database connection.
+- `DB`: Database connection.
 - `app`: The Express application.
-- ``commonBeforeAll``, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
-`u1Token`: JWT token for user `u1`.
+- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
+  `u1Token`: JWT token for user `u1`.
+
 ```javascript
 "use strict";
 
@@ -781,12 +1154,14 @@ afterAll(commonAfterAll);
 ```
 
 2. Test Suite: `POST /companies`
+
 - Test for Successful Creation:
   - Verifies that a new company can be created with valid data.
 - Test for Missing Data:
   - Verifies that a 400 status code is returned for missing data.
 - Test for Invalid Data:
   - Verifies that a 400 status code is returned for invalid data.
+
 ```javascript
 describe("POST /companies", function () {
   const newCompany = {
@@ -799,9 +1174,9 @@ describe("POST /companies", function () {
 
   test("ok for users", async function () {
     const resp = await request(app)
-        .post("/companies")
-        .send(newCompany)
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/companies")
+      .send(newCompany)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       company: newCompany,
@@ -810,80 +1185,83 @@ describe("POST /companies", function () {
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
-        .post("/companies")
-        .send({
-          handle: "new",
-          numEmployees: 10,
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/companies")
+      .send({
+        handle: "new",
+        numEmployees: 10,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 
   test("bad request with invalid data", async function () {
     const resp = await request(app)
-        .post("/companies")
-        .send({
-          ...newCompany,
-          logoUrl: "not-a-url",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/companies")
+      .send({
+        ...newCompany,
+        logoUrl: "not-a-url",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 });
 ```
 
 3. Test Suite: `GET /companies`
+
 - Test for Retrieving All Companies:
   - Verifies that all companies can be retrieved.
 - Test for Error Handling:
   - Verifies that a 500 status code is returned when an error occurs.
+
 ```javascript
 describe("GET /companies", function () {
   test("ok for anon", async function () {
     const resp = await request(app).get("/companies");
     expect(resp.body).toEqual({
-      companies:
-          [
-            {
-              handle: "c1",
-              name: "C1",
-              description: "Desc1",
-              numEmployees: 1,
-              logoUrl: "http://c1.img",
-            },
-            {
-              handle: "c2",
-              name: "C2",
-              description: "Desc2",
-              numEmployees: 2,
-              logoUrl: "http://c2.img",
-            },
-            {
-              handle: "c3",
-              name: "C3",
-              description: "Desc3",
-              numEmployees: 3,
-              logoUrl: "http://c3.img",
-            },
-          ],
+      companies: [
+        {
+          handle: "c1",
+          name: "C1",
+          description: "Desc1",
+          numEmployees: 1,
+          logoUrl: "http://c1.img",
+        },
+        {
+          handle: "c2",
+          name: "C2",
+          description: "Desc2",
+          numEmployees: 2,
+          logoUrl: "http://c2.img",
+        },
+        {
+          handle: "c3",
+          name: "C3",
+          description: "Desc3",
+          numEmployees: 3,
+          logoUrl: "http://c3.img",
+        },
+      ],
     });
   });
 
   test("fails: test next() handler", async function () {
     await `DB`.query("DROP TABLE companies CASCADE");
     const resp = await request(app)
-        .get("/companies")
-        .set("authorization", `Bearer ${u1Token}`);
+      .get("/companies")
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
 });
 ```
 
 4. Test Suite: `GET /companies/:handle`
+
 - Test for Retrieving a Company:
   - Verifies that a company can be retrieved by its handle.
 - Test for Non-Existent Company:
   - Verifies that a 404 status code is returned for a non-existent company.
+
 ```javascript
 describe("GET /companies/:handle", function () {
   test("works for anon", async function () {
@@ -920,6 +1298,7 @@ describe("GET /companies/:handle", function () {
 ```
 
 5. Test Suite: `PATCH /companies/:handle`
+
 - Test for Successful Update:
   - Verifies that a company's data can be updated.
 - Test for Unauthorized Access:
@@ -930,15 +1309,16 @@ describe("GET /companies/:handle", function () {
   - Verifies that a 400 status code is returned for an invalid handle change.
 - Test for Invalid Data:
   - Verifies that a 400 status code is returned for invalid data.
+
 ```javascript
 describe("PATCH /companies/:handle", function () {
   test("works for users", async function () {
     const resp = await request(app)
-        .patch(`/companies/c1`)
-        .send({
-          name: "C1-new",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/companies/c1`)
+      .send({
+        name: "C1-new",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       company: {
         handle: "c1",
@@ -951,79 +1331,78 @@ describe("PATCH /companies/:handle", function () {
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .patch(`/companies/c1`)
-        .send({
-          name: "C1-new",
-        });
+    const resp = await request(app).patch(`/companies/c1`).send({
+      name: "C1-new",
+    });
     expect(resp.statusCode).toEqual(401);
   });
 
   test("not found on no such company", async function () {
     const resp = await request(app)
-        .patch(`/companies/nope`)
-        .send({
-          name: "new nope",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/companies/nope`)
+      .send({
+        name: "new nope",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 
   test("bad request on handle change attempt", async function () {
     const resp = await request(app)
-        .patch(`/companies/c1`)
-        .send({
-          handle: "c1-new",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/companies/c1`)
+      .send({
+        handle: "c1-new",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 
   test("bad request on invalid data", async function () {
     const resp = await request(app)
-        .patch(`/companies/c1`)
-        .send({
-          logoUrl: "not-a-url",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/companies/c1`)
+      .send({
+        logoUrl: "not-a-url",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 });
 ```
 
 6. Test Suite: `DELETE /companies/:handle`
+
 - Test for Successful Deletion:
   - Verifies that a company can be deleted.
 - Test for Unauthorized Access:
   - Verifies that a 401 status code is returned for unauthorized access.
 - Test for Non-Existent Company:
   - Verifies that a 404 status code is returned for a non-existent company.
+
 ```javascript
 describe("DELETE /companies/:handle", function () {
   test("works for users", async function () {
     const resp = await request(app)
-        .delete(`/companies/c1`)
-        .set("authorization", `Bearer ${u1Token}`);
+      .delete(`/companies/c1`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({ deleted: "c1" });
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .delete(`/companies/c1`);
+    const resp = await request(app).delete(`/companies/c1`);
     expect(resp.statusCode).toEqual(401);
   });
 
   test("not found for no such company", async function () {
     const resp = await request(app)
-        .delete(`/companies/nope`)
-        .set("authorization", `Bearer ${u1Token}`);
+      .delete(`/companies/nope`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 });
 ```
 
 7. Understanding `beforeEach` and `afterEach`
-In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+   In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
 
 - `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
   - In this file, `commonBeforeEach` starts a new database transaction before each test.
@@ -1031,10 +1410,12 @@ In the context of testing, `beforeEach` and `afterEach` are hooks provided by te
   - In this file, `commonAfterEach` rolls back the database transaction after each test.
 
 8. Running Tests with Coverage and the `-i` Flag
-To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+   To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+
 ```javascript
 jest --coverage -i
 ```
+
 - `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
 - `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
 
@@ -1167,82 +1548,98 @@ sequenceDiagram
 - The `commonAfterAll` function sends a query to the database to close the connection.
 
 5. User Creation (`POST /users`):
+
 - The test framework sends a POST request to the `/users` endpoint with valid user data.
 - The application inserts the new user into the database and returns the user details and a token.
 - The test framework verifies that the response contains the user details and token.
 
 6. Admin Creation (`POST /users`):
+
 - The test framework sends a POST request to the `/users` endpoint with valid admin data.
 - The application inserts the new admin into the database and returns the admin details and a token.
 - The test framework verifies that the response contains the admin details and token.
 
 7. Unauthorized User Creation (`POST /users`):
+
 - The test framework sends a POST request to the `/users` endpoint without authorization.
 - The application returns a 401 Unauthorized status.
 - The test framework verifies that the response status is 401.
 
 8. Bad Request with Missing Data (`POST /users`):
+
 - The test framework sends a POST request to the `/users` endpoint with missing data.
 - The application returns a 400 Bad Request status.
 - The test framework verifies that the response status is 400.
 
 9. Bad Request with Invalid Data (`POST /users`):
+
 - The test framework sends a POST request to the `/users` endpoint with invalid data.
 - The application returns a 400 Bad Request status.
 - The test framework verifies that the response status is 400.
 
 10. Retrieve All Users (`GET /users`):
+
 - The test framework sends a GET request to the `/users` endpoint.
 - The application retrieves all users from the database and returns them.
 - The test framework verifies that the response contains the list of users.
 
 11. Unauthorized Access (`GET /users`):
+
 - The test framework sends a GET request to the `/users` endpoint without authorization.
 - The application returns a 401 Unauthorized status.
 - The test framework verifies that the response status is 401.
 
 12. Error Handling (`GET /users`):
+
 - The test framework drops the `users` table to simulate an error.
 - The test framework sends a GET request to the `/users` endpoint.
 - The application returns a 500 Internal Server Error status.
 - The test framework verifies that the response status is 500.
 
 13. Retrieve User by Username (`GET /users/:username`):
+
 - The test framework sends a GET request to the `/users/u1` endpoint.
 - The application retrieves the user details from the database and returns them.
 - The test framework verifies that the response contains the user details.
 
 14. Unauthorized Access (`GET /users/:username`):
+
 - The test framework sends a GET request to the `/users/u1` endpoint without authorization.
 - The application returns a 401 Unauthorized status.
 - The test framework verifies that the response status is 401.
 
 15. User Not Found (`GET /users/:username`):
+
 - The test framework sends a GET request to the `/users/nope` endpoint.
 - The application returns a 404 Not Found status.
 - The test framework verifies that the response status is 404.
 
 16. Update User (`PATCH /users/:username`):
+
 - The test framework sends a PATCH request to the `/users/u1` endpoint with valid data.
 - The application updates the user details in the database and returns the updated details.
 - The test framework verifies that the response contains the updated user details.
 
 17. Unauthorized Update (`PATCH /users/:username`):
+
 - The test framework sends a PATCH request to the `/users/u1` endpoint without authorization.
 - The application returns a 401 Unauthorized status.
 - The test framework verifies that the response status is 401.
 
 18. User Not Found on Update (`PATCH /users/:username`):
+
 - The test framework sends a PATCH request to the `/users/nope` endpoint.
 - The application returns a 404 Not Found status.
 - The test framework verifies that the response status is 404.
 
 19. Invalid Data on Update (`PATCH /users/:username`):
+
 - The test framework sends a PATCH request to the `/users/u1` endpoint with invalid data.
 - The application returns a 400 Bad Request status.
 - The test framework verifies that the response status is 400.
 
 20. Update Password (`PATCH /users/:username`):
+
 - The test framework sends a PATCH request to the `/users/u1` endpoint with a new password.
 - The application updates the user password in the database and returns the updated details.
 - The test framework verifies that the response contains the updated user details.
@@ -1251,16 +1648,19 @@ sequenceDiagram
 - The test framework verifies that the authentication is successful.
 
 21. Delete User (`DELETE /users/:username`):
+
 - The test framework sends a DELETE request to the `/users/u1` endpoint.
 - The application deletes the user from the database and returns a confirmation.
 - The test framework verifies that the response contains the deletion confirmation.
 
 22. Unauthorized Deletion (`DELETE /users/:username`):
+
 - The test framework sends a DELETE request to the `/users/u1` endpoint without authorization.
 - The application returns a 401 Unauthorized status.
 - The test framework verifies that the response status is 401.
 
 23. User Not Found on Deletion (`DELETE /users/:username`):
+
 - The test framework sends a DELETE request to the `/users/nope` endpoint.
 - The application returns a 404 Not Found status.
 - The test framework verifies that the response status is 404.
@@ -1268,15 +1668,18 @@ sequenceDiagram
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
 #### users.test.js code overview
+
 This file contains tests for the user routes using the `jest` testing framework.
+
 - `request`: Library for testing HTTP requests.
-- ``DB``: Database connection.
+- `DB`: Database connection.
 - `app`: The Express application.
 - `User`: The `User` model.
-- ``commonBeforeAll``, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
-u1Token: JWT token for user u1.
+- `commonBeforeAll`, `commonBeforeEach`, `commonAfterEach`, `commonAfterAll`: Common setup and teardown functions.
+  u1Token: JWT token for user u1.
 
 1. Imports and Setup:
+
 ```javascript
 "use strict";
 
@@ -1301,6 +1704,7 @@ afterAll(commonAfterAll);
 ```
 
 2. Test Suite: `POST /users`
+
 - Test for Successful Creation (Non-Admin):
   - Verifies that a new non-admin user can be created.
 - Test for Successful Creation (Admin):
@@ -1311,20 +1715,21 @@ afterAll(commonAfterAll);
   - Verifies that a 400 status code is returned for missing data.
 - Test for Invalid Data:
   - Verifies that a 400 status code is returned for invalid data.
+
 ```javascript
 describe("POST /users", function () {
   test("works for users: create non-admin", async function () {
     const resp = await request(app)
-        .post("/users")
-        .send({
-          username: "u-new",
-          firstName: "First-new",
-          lastName: "Last-newL",
-          password: "password-new",
-          email: "new@email.com",
-          isAdmin: false,
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/users")
+      .send({
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        password: "password-new",
+        email: "new@email.com",
+        isAdmin: false,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       user: {
@@ -1333,22 +1738,23 @@ describe("POST /users", function () {
         lastName: "Last-newL",
         email: "new@email.com",
         isAdmin: false,
-      }, token: expect.any(String),
+      },
+      token: expect.any(String),
     });
   });
 
   test("works for users: create admin", async function () {
     const resp = await request(app)
-        .post("/users")
-        .send({
-          username: "u-new",
-          firstName: "First-new",
-          lastName: "Last-newL",
-          password: "password-new",
-          email: "new@email.com",
-          isAdmin: true,
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/users")
+      .send({
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        password: "password-new",
+        email: "new@email.com",
+        isAdmin: true,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       user: {
@@ -1357,64 +1763,65 @@ describe("POST /users", function () {
         lastName: "Last-newL",
         email: "new@email.com",
         isAdmin: true,
-      }, token: expect.any(String),
+      },
+      token: expect.any(String),
     });
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .post("/users")
-        .send({
-          username: "u-new",
-          firstName: "First-new",
-          lastName: "Last-newL",
-          password: "password-new",
-          email: "new@email.com",
-          isAdmin: true,
-        });
+    const resp = await request(app).post("/users").send({
+      username: "u-new",
+      firstName: "First-new",
+      lastName: "Last-newL",
+      password: "password-new",
+      email: "new@email.com",
+      isAdmin: true,
+    });
     expect(resp.statusCode).toEqual(401);
   });
 
   test("bad request if missing data", async function () {
     const resp = await request(app)
-        .post("/users")
-        .send({
-          username: "u-new",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/users")
+      .send({
+        username: "u-new",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 
   test("bad request if invalid data", async function () {
     const resp = await request(app)
-        .post("/users")
-        .send({
-          username: "u-new",
-          firstName: "First-new",
-          lastName: "Last-newL",
-          password: "password-new",
-          email: "not-an-email",
-          isAdmin: true,
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .post("/users")
+      .send({
+        username: "u-new",
+        firstName: "First-new",
+        lastName: "Last-newL",
+        password: "password-new",
+        email: "not-an-email",
+        isAdmin: true,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 });
 ```
 
 3. Test Suite: `GET /users`
+
 - Test for Retrieving All Users:
   - Verifies that all users can be retrieved.
 - Test for Unauthorized Access:
   - Verifies that a 401 status code is returned for unauthorized access.
 - Test for Error Handling:
   - Verifies that a 500 status code is returned when an error occurs.
+
 ```javascript
 describe("GET /users", function () {
   test("works for users", async function () {
     const resp = await request(app)
-        .get("/users")
-        .set("authorization", `Bearer ${u1Token}`);
+      .get("/users")
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       users: [
         {
@@ -1443,34 +1850,35 @@ describe("GET /users", function () {
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .get("/users");
+    const resp = await request(app).get("/users");
     expect(resp.statusCode).toEqual(401);
   });
 
   test("fails: test next() handler", async function () {
     await `DB`.query("DROP TABLE users CASCADE");
     const resp = await request(app)
-        .get("/users")
-        .set("authorization", `Bearer ${u1Token}`);
+      .get("/users")
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(500);
   });
 });
 ```
 
 4. Test Suite: `GET /users/:username`
+
 - Test for Retrieving a User:
   - Verifies that a user can be retrieved by their username.
 - Test for Unauthorized Access:
   - Verifies that a 401 status code is returned for unauthorized access.
 - Test for Non-Existent User:
   - Verifies that a 404 status code is returned for a non-existent user.
+
 ```javascript
 describe("GET /users/:username", function () {
   test("works for users", async function () {
     const resp = await request(app)
-        .get(`/users/u1`)
-        .set("authorization", `Bearer ${u1Token}`);
+      .get(`/users/u1`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       user: {
         username: "u1",
@@ -1483,21 +1891,21 @@ describe("GET /users/:username", function () {
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .get(`/users/u1`);
+    const resp = await request(app).get(`/users/u1`);
     expect(resp.statusCode).toEqual(401);
   });
 
   test("not found if user not found", async function () {
     const resp = await request(app)
-        .get(`/users/nope`)
-        .set("authorization", `Bearer ${u1Token}`);
+      .get(`/users/nope`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 });
 ```
 
 5. Test Suite: `PATCH /users/:username`
+
 - Test for Successful Update:
   - Verifies that a user's data can be updated.
 - Test for Unauthorized Access:
@@ -1508,15 +1916,16 @@ describe("GET /users/:username", function () {
   - Verifies that a 400 status code is returned for invalid data.
 - Test for Updating Password:
   - Verifies that a user's password can be updated.
+
 ```javascript
 describe("PATCH /users/:username", () => {
   test("works for users", async function () {
     const resp = await request(app)
-        .patch(`/users/u1`)
-        .send({
-          firstName: "New",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/users/u1`)
+      .send({
+        firstName: "New",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       user: {
         username: "u1",
@@ -1529,41 +1938,39 @@ describe("PATCH /users/:username", () => {
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .patch(`/users/u1`)
-        .send({
-          firstName: "New",
-        });
+    const resp = await request(app).patch(`/users/u1`).send({
+      firstName: "New",
+    });
     expect(resp.statusCode).toEqual(401);
   });
 
   test("not found if no such user", async function () {
     const resp = await request(app)
-        .patch(`/users/nope`)
-        .send({
-          firstName: "Nope",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/users/nope`)
+      .send({
+        firstName: "Nope",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 
   test("bad request if invalid data", async function () {
     const resp = await request(app)
-        .patch(`/users/u1`)
-        .send({
-          firstName: 42,
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/users/u1`)
+      .send({
+        firstName: 42,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(400);
   });
 
   test("works: set new password", async function () {
     const resp = await request(app)
-        .patch(`/users/u1`)
-        .send({
-          password: "new-password",
-        })
-        .set("authorization", `Bearer ${u1Token}`);
+      .patch(`/users/u1`)
+      .send({
+        password: "new-password",
+      })
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       user: {
         username: "u1",
@@ -1580,38 +1987,39 @@ describe("PATCH /users/:username", () => {
 ```
 
 6. Test Suite: `DELETE /users/:username`
+
 - Test for Successful Deletion:
   - Verifies that a user can be deleted.
 - Test for Unauthorized Access:
   - Verifies that a 401 status code is returned for unauthorized access.
 - Test for Non-Existent User:
   - Verifies that a 404 status code is returned for a non-existent user.
+
 ```javascript
 describe("DELETE /users/:username", function () {
   test("works for users", async function () {
     const resp = await request(app)
-        .delete(`/users/u1`)
-        .set("authorization", `Bearer ${u1Token}`);
+      .delete(`/users/u1`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({ deleted: "u1" });
   });
 
   test("unauth for anon", async function () {
-    const resp = await request(app)
-        .delete(`/users/u1`);
+    const resp = await request(app).delete(`/users/u1`);
     expect(resp.statusCode).toEqual(401);
   });
 
   test("not found if user missing", async function () {
     const resp = await request(app)
-        .delete(`/users/nope`)
-        .set("authorization", `Bearer ${u1Token}`);
+      .delete(`/users/nope`)
+      .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
 });
 ```
 
 7. Understanding `beforeEach` and `afterEach`
-In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
+   In the context of testing, `beforeEach` and `afterEach` are hooks provided by testing frameworks like Jest to run code before and after each test case, respectively.
 
 - `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
   - In this file, `commonBeforeEach` starts a new database transaction before each test.
@@ -1619,10 +2027,12 @@ In the context of testing, `beforeEach` and `afterEach` are hooks provided by te
   - In this file, `commonAfterEach` rolls back the database transaction after each test.
 
 8. Running Tests with Coverage and the `-i` Flag
-To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+   To run the tests with coverage and ensure they run in order (in band), you can use the following command:
+
 ```javascript
 jest --coverage -i
 ```
+
 - `--coverage`: Generates a test coverage report, showing which parts of your code are covered by tests.
 - `-i` (in band): Ensures that tests run sequentially rather than in parallel. This is useful when tests might interfere with each other if run simultaneously.
 
@@ -1631,15 +2041,18 @@ jest --coverage -i
 ### Scripts
 
 ### auth.js
+
 This file contains the routes for handling authentication in the Jobly application.
 
 1. Imports and Setup
+
 - `jsonschema`: Library for validating JSON objects against a schema.
 - `User`: The `User` model for interacting with the `users` table.
 - `express`: The main framework used to build the web server.
 - `createToken`: Function to create JSON Web Tokens (JWT).
 - `userAuthSchema`, `userRegisterSchema`: JSON schemas for validating user authentication and registration data.
 - `BadRequestError`: Custom error class for handling bad requests.
+
 ```javascript
 "use strict";
 
@@ -1654,16 +2067,18 @@ const { BadRequestError } = require("../expressError");
 ```
 
 2. Route: `POST /auth/token`
+
 - Validates the request body against the `userAuthSchema`.
 - Authenticates the user with the provided username and password.
 - Creates a JWT token for the authenticated user.
 - Returns the token in the response.
+
 ```javascript
 router.post("/token", async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userAuthSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -1678,16 +2093,18 @@ router.post("/token", async function (req, res, next) {
 ```
 
 3. Route: `POST /auth/register`
+
 - Validates the request body against the `userRegisterSchema`.
 - Registers a new user with the provided data.
 - Creates a JWT token for the new user.
 - Returns the token in the response.
+
 ```javascript
 router.post("/register", async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userRegisterSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -1701,13 +2118,12 @@ router.post("/register", async function (req, res, next) {
 ```
 
 4. Export the Router:
+
 ```javascript
 module.exports = router;
 ```
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
-
-
 
 #### auth.js sequence diagram
 
@@ -1760,8 +2176,6 @@ sequenceDiagram
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
-
 #### auth.js diagram explanation
 
 1. Token Creation (`POST /auth/token`):
@@ -1796,18 +2210,19 @@ sequenceDiagram
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
 #### auth.js code overview
 
 This file contains the routes for handling authentication in the Jobly application.
 
 1. Imports and Setup
+
 - `jsonschema`: Library for validating JSON objects against a schema.
 - `User`: The `User` model for interacting with the `users` table.
 - `express`: The main framework used to build the web server.
 - `createToken`: Function to create JSON Web Tokens (JWT).
 - `userAuthSchema`, `userRegisterSchema`: JSON schemas for validating user authentication and registration data.
 - `BadRequestError`: Custom error class for handling bad requests.
+
 ```javascript
 "use strict";
 
@@ -1822,16 +2237,18 @@ const { BadRequestError } = require("../expressError");
 ```
 
 2. Route: `POST /auth/token`
+
 - Validates the request body against the `userAuthSchema`.
 - Authenticates the user with the provided username and password.
 - Creates a JWT token for the authenticated user.
 - Returns the token in the response.
+
 ```javascript
 router.post("/token", async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userAuthSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -1846,16 +2263,18 @@ router.post("/token", async function (req, res, next) {
 ```
 
 3. Route: `POST /auth/register`
+
 - Validates the request body against the `userRegisterSchema`.
 - Registers a new user with the provided data.
 - Creates a JWT token for the new user.
 - Returns the token in the response.
+
 ```javascript
 router.post("/register", async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userRegisterSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -1869,16 +2288,15 @@ router.post("/register", async function (req, res, next) {
 ```
 
 4. Export the Router:
+
 ```javascript
 module.exports = router;
 ```
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
-
-
 ### companies.js
+
 #### companies.js sequence diagram
 
 ```mermaid
@@ -1969,8 +2387,6 @@ sequenceDiagram
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
-
 #### companies.js diagram explanation
 
 1. Company Creation (`POST /companies`):
@@ -2022,18 +2438,19 @@ sequenceDiagram
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
 #### companies.js code overview
 
 This file contains the routes for handling company-related operations in the Jobly application.
 
 1. Imports and Setup
+
 - `jsonschema`: Library for validating JSON objects against a schema.
 - `express`: The main framework used to build the web server.
 - `BadRequestError`: Custom error class for handling bad requests.
 - `ensureLoggedIn`: Middleware to ensure the user is logged in.
 - `Company`: The `Company` model for interacting with the `companies` table.
 - `companyNewSchema`, `companyUpdateSchema`: JSON schemas for validating company data.
+
 ```javascript
 "use strict";
 
@@ -2051,15 +2468,17 @@ const router = new express.Router();
 ```
 
 2. Route: `POST /companies`
+
 - Validates the request body against the `companyNewSchema`.
 - Creates a new company with the provided data.
 - Returns the created company in the response.
+
 ```javascript
 router.post("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyNewSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -2072,8 +2491,10 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 ```
 
 3. Route: `GET /companies`
+
 - Retrieves all companies from the database.
 - Returns the list of companies in the response.
+
 ```javascript
 router.get("/", async function (req, res, next) {
   try {
@@ -2086,8 +2507,10 @@ router.get("/", async function (req, res, next) {
 ```
 
 4. Route: `GET /companies/:handle`
+
 - Retrieves a company by its handle.
 - Returns the company data in the response.
+
 ```javascript
 router.get("/:handle", async function (req, res, next) {
   try {
@@ -2100,15 +2523,17 @@ router.get("/:handle", async function (req, res, next) {
 ```
 
 5. Route: `PATCH /companies/:handle`
+
 - Validates the request body against the `companyUpdateSchema`.
 - Updates the company data with the provided fields.
 - Returns the updated company data in the response.
+
 ```javascript
 router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -2121,8 +2546,10 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
 ```
 
 6. Route: `DELETE /companies/:handle`
+
 - Deletes a company by its handle.
 - Returns a confirmation message in the response.
+
 ```javascript
 router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
@@ -2135,15 +2562,15 @@ router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
 ```
 
 7. Export the Router:
+
 ```javascript
 module.exports = router;
 ```
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
-
 ### users.js
+
 #### users.js sequence diagram
 
 ```mermaid
@@ -2236,9 +2663,6 @@ sequenceDiagram
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-
-
-
 #### users.js diagram explanation
 
 **Explanation of Each Step**
@@ -2299,6 +2723,7 @@ sequenceDiagram
 This file contains the routes for handling user-related operations in the Jobly application.
 
 1. Imports and Setup
+
 - `jsonschema`: Library for validating JSON objects against a schema.
 - `express`: The main framework used to build the web server.
 - `ensureLoggedIn`: Middleware to ensure the user is logged in.
@@ -2306,6 +2731,7 @@ This file contains the routes for handling user-related operations in the Jobly 
 - `User`: The `User` model for interacting with the `users` table.
 - `createToken`: Function to create JSON Web Tokens (JWT).
 - `userNewSchema`, `userUpdateSchema`: JSON schemas for validating user data.
+
 ```javascript
 "use strict";
 
@@ -2322,16 +2748,18 @@ const router = express.Router();
 ```
 
 2. Route: `POST /users`
+
 - Validates the request body against the `userNewSchema`.
 - Registers a new user with the provided data.
 - Creates a JWT token for the new user.
 - Returns the new user and token in the response.
+
 ```javascript
 router.post("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userNewSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -2345,8 +2773,10 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 ```
 
 3. Route: `GET /users`
-  - Retrieves all users from the database.
-  - Returns the list of users in the response.
+
+- Retrieves all users from the database.
+- Returns the list of users in the response.
+
 ```javascript
 router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
@@ -2359,8 +2789,10 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
 ```
 
 4. Route: `GET /users/:username`
+
 - Retrieves a user by their username.
 - Returns the user data in the response.
+
 ```javascript
 router.get("/:username", ensureLoggedIn, async function (req, res, next) {
   try {
@@ -2373,15 +2805,17 @@ router.get("/:username", ensureLoggedIn, async function (req, res, next) {
 ```
 
 5. Route: `PATCH /users/:username`
+
 - Validates the request body against the userUpdateSchema.
 - Updates the user data with the provided fields.
 - Returns the updated user data in the response.
+
 ```javascript
 router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userUpdateSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -2394,8 +2828,10 @@ router.patch("/:username", ensureLoggedIn, async function (req, res, next) {
 ```
 
 6. Route: `DELETE /users/:username`
+
 - Deletes a user by their username.
 - Returns a confirmation message in the response.
+
 ```javascript
 router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
   try {
@@ -2408,9 +2844,9 @@ router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
 ```
 
 7. Export the Router:
+
 ```javascript
 module.exports = router;
 ```
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
-
