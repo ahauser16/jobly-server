@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureLoggedIn } = require("../middleware/auth");
+const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
@@ -16,15 +16,16 @@ const router = new express.Router();
 
 
 /** POST / { company } =>  { company }
- *
+ * creates a new company with the provided data and returns the new company with the same data structure below.
  * company should be { handle, name, description, numEmployees, logoUrl }
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
  * Authorization required: login
+ * Refactor so that only users who are logged in and have the `isAdmin` field set to `TRUE` can create a new company.
  */
 
-router.post("/", ensureLoggedIn, async function (req, res, next) {
+router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyNewSchema);
     if (!validator.valid) {
@@ -40,7 +41,8 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 /** GET /  =>
- *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
+ * retrieves a list of companies with the following data structure:
+ * { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
  *
  * Can filter on provided search filters:
  * - minEmployees
@@ -76,7 +78,7 @@ router.get("/", async function (req, res, next) {
 });
 
 /** GET /[handle]  =>  { company }
- *
+ * retrieves a company by querying that company's `handle` value
  *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
  *   where jobs is [{ id, title, salary, equity }, ...]
  *
@@ -93,7 +95,7 @@ router.get("/:handle", async function (req, res, next) {
 });
 
 /** PATCH /[handle] { fld1, fld2, ... } => { company }
- *
+ * updates a company's data by querying that company's `handle` value and providing key/value pairs to update the company with.
  * Patches company data.
  *
  * fields can be: { name, description, numEmployees, logo_url }
@@ -101,9 +103,10 @@ router.get("/:handle", async function (req, res, next) {
  * Returns { handle, name, description, numEmployees, logo_url }
  *
  * Authorization required: login
+ * Refactor so that only users who are logged in and have the `isAdmin` field set to `TRUE` can create a new company.
  */
 
-router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
+router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
     if (!validator.valid) {
@@ -121,9 +124,10 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
 /** DELETE /[handle]  =>  { deleted: handle }
  *
  * Authorization: login
+ * Refactor so that only users who are logged in and have the `isAdmin` field set to `TRUE` can create a new company.
  */
 
-router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
+router.delete("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
   try {
     await Company.remove(req.params.handle);
     return res.json({ deleted: req.params.handle });

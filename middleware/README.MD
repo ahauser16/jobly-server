@@ -50,6 +50,16 @@ sequenceDiagram
         Error-->>Test: Call next(err)
         Test-->>Test: Verify UnauthorizedError
     end
+
+    Test->>Auth: [Ensure Admin] ensureAdmin(req, res, next)
+    alt User is admin
+        Auth-->>Test: Call next()
+        Test-->>Test: Verify no error
+    else User is not admin
+        Auth-->>Error: Throw ForbiddenError
+        Error-->>Test: Call next(err)
+        Test-->>Test: Verify ForbiddenError
+    end
 ```
 [Back to TOC](#middleware-folder-file-notesexplanationsdiagrams)
 
@@ -81,6 +91,16 @@ sequenceDiagram
      - The `ensureLoggedIn` function throws an `UnauthorizedError`.
      - The `ensureLoggedIn` function calls `next(err)` with the `UnauthorizedError`.
      - The test framework verifies that an `UnauthorizedError` is thrown.
+
+3. Ensure Admin (`ensureAdmin`):
+  - The test framework calls the `ensureAdmin` function with a request object (`req`), response object (`res`), and a `next` function.
+  - If the user is an admin (i.e., `res.locals.user.isAdmin` is `true`):
+    - The `ensureAdmin` function calls `next()`.
+    - The test framework verifies that no error is thrown.
+  - If the user is not an admin (i.e., `res.locals.user.isAdmin` is `false` or `undefined`):
+    - The `ensureAdmin` function throws a `ForbiddenError`.
+    - The `ensureAdmin` function calls `next(err)` with the `ForbiddenError`.
+    - The test framework verifies that a `ForbiddenError` is thrown.
 
 [Back to TOC](#middleware-folder-file-notesexplanationsdiagrams)
 
@@ -192,7 +212,50 @@ describe("ensureLoggedIn", function () {
 });
 ```
 
-4. Understanding `beforeEach` and `afterEach`
+4. Test Suite: `ensureAdmin`
+The `ensureAdmin` middleware function is used to ensure that a user has admin privileges before allowing access to certain routes. It checks if the user is logged in and has the `isAdmin` flag set to `true`. If the user is not logged in or is not an admin, it throws a `ForbiddenError`.
+
+- Test for Admin User:
+  - Verifies that an admin user (with `res.locals.user.isAdmin` set to `true`) proceeds without error.
+- Test for Non-Admin User:
+  - Verifies that a non-admin user (with `res.locals.user.isAdmin` set to `false`) throws a `ForbiddenError`.
+- Test for Not Logged-In User:
+  - Verifies that a user who is not logged in (without `res.locals.user` set) throws a `ForbiddenError`.
+```javascript
+describe("ensureAdmin", function () {
+  test("works for admin", function () {
+    expect.assertions(1);
+    const req = {};
+    const res = { locals: { user: { username: "admin", isAdmin: true } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    ensureAdmin(req, res, next);
+  });
+
+  test("forbidden for non-admin", function () {
+    expect.assertions(1);
+    const req = {};
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    const next = function (err) {
+      expect(err instanceof ForbiddenError).toBeTruthy();
+    };
+    ensureAdmin(req, res, next);
+  });
+
+  test("forbidden if no login", function () {
+    expect.assertions(1);
+    const req = {};
+    const res = { locals: {} };
+    const next = function (err) {
+      expect(err instanceof ForbiddenError).toBeTruthy();
+    };
+    ensureAdmin(req, res, next);
+  });
+});
+```
+
+1. Understanding `beforeEach` and `afterEach`
    In the provided test file, there are no `beforeEach` or `afterEach` hooks. However, these hooks are commonly used in other test files to manage database transactions or reset state.
 
 - `beforeEach`: Runs a specific piece of code before each test case. This is useful for setting up a consistent state before each test.
@@ -251,6 +314,17 @@ sequenceDiagram
         Error-->>App: Call next(err)
         App-->>Client: Return 401 Unauthorized
     end
+
+    Client->>App: [Ensure Admin] Request requiring admin access
+    App->>Auth: ensureAdmin(req, res, next)
+    alt User is admin
+        Auth-->>App: Call next()
+        App-->>Client: Proceed with request
+    else User is not admin
+        Auth-->>Error: Throw ForbiddenError
+        Error-->>App: Call next(err)
+        App-->>Client: Return 403 Forbidden
+    end
 ```
 [Back to TOC](#middleware-folder-file-notesexplanationsdiagrams)
 
@@ -286,6 +360,18 @@ sequenceDiagram
   - The `ensureLoggedIn` function throws an `UnauthorizedError`.
   - The `ensureLoggedIn` function calls `next(err)` with the `UnauthorizedError`.
   - The application returns a 401 Unauthorized status to the client.
+
+3. Ensure Admin (`ensureAdmin`):
+- The client sends a request to the application that requires the user to be an admin.
+- The Express application routes the request to the `ensureAdmin` middleware function.
+- If the user is an admin (i.e., `res.locals.user.isAdmin` is `true`):
+  - The `ensureAdmin` function calls `next()`.
+  - The application proceeds with the request.
+- If the user is not an admin (i.e., `res.locals.user.isAdmin` is `false` or `undefined`):
+  - The `ensureAdmin` function throws a `ForbiddenError`.
+  - The `ensureAdmin` function calls `next(err)` with the `ForbiddenError`.
+  - The application returns a 403 Forbidden status to the client.
+
 [Back to TOC](#middleware-folder-file-notesexplanationsdiagrams)
 
 #### auth.js code overview
@@ -344,7 +430,25 @@ function ensureLoggedIn(req, res, next) {
 }
 ```
 
-4. Export the Middleware Functions
+4. Middleware: `ensureAdmin`
+- This middleware function checks if the user is an admin by verifying the `isAdmin` field in `res.locals.user`.
+- If the user is not an admin, it throws a `ForbiddenError`.
+- If the user is an admin, it calls `next()` to proceed to the next middleware or route handler.
+```javascript
+function ensureAdmin(req, res, next) {
+  try {
+    if (!res.locals.user || !res.locals.user.isAdmin) {
+      throw new ForbiddenError();
+    }
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
+```
+
+
+5. Export the Middleware Functions
 
 ```javascript
 module.exports = {

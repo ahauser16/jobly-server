@@ -25,6 +25,7 @@ This is the Express backend for Jobly, version 2.
   - [Part Three: Change Authorization](#part-three-change-authorization)
     - [Companies](#companies)
     - [Users](#users)
+    - [Admin Authorization Refactor Plan](#admin-authorization-refactor-plan)
   - [Part Four: Jobs](#part-four-jobs)
     - [Adding Job Model, Routes, and Tests](#adding-job-model-routes-and-tests)
     - [Adding Filtering](#adding-filtering-1)
@@ -560,19 +561,19 @@ We’ve provided a model and routes for companies.
 
 The route for listing all companies (**_GET /companies_**) works, but it currently shows all companies. Add a new feature to this, allowing API users to filter the results based on optional filtering criteria, any or all of which can be passed in the query string:
 
-- **_name_**: filter by company name: if the string “net” is passed in, this should find any company who name contains the word “net”, case-insensitive (so “Study Networks” should be included).
-- **_minEmployees_**: filter to companies that have at least that number of employees.
-- **_maxEmployees_**: filter to companies that have no more than that number of employees.
-- If the **_minEmployees_** parameter is greater than the **_maxEmployees_** parameter, respond with a 400 error with an appropriate message.
+- [x] **_name_**: filter by company name: if the string “net” is passed in, this should find any company who name contains the word “net”, case-insensitive (so “Study Networks” should be included).
+- [x] **_minEmployees_**: filter to companies that have at least that number of employees.
+- [x] **_maxEmployees_**: filter to companies that have no more than that number of employees.
+- [x] If the **_minEmployees_** parameter is greater than the **_maxEmployees_** parameter, respond with a 400 error with an appropriate message.
 
 
 #### Some requirements:
 
-- Do not solve this by issuing a more complex SELECT statement than is needed (for example, if the user isn’t filtering by **_minEmployees_** or **_maxEmployees_**, the SELECT statement should not include anything about the **_num_employees_**.
-- Validate that the request does not contain inappropriate other filtering fields in the route. Do the actual filtering in the model.
-- Write unit tests for the model that exercise this in different ways, so you can be assured different combinations of filtering will work.
-- Write tests for the route that will ensure that it correctly validates the incoming request and uses the model method properly.
-- Document all new code here clearly; this is functionality that future team members should be able to understand how to use from your docstrings.
+- [x] Do not solve this by issuing a more complex SELECT statement than is needed (for example, if the user isn’t filtering by **_minEmployees_** or **_maxEmployees_**, the SELECT statement should not include anything about the **_num_employees_**.
+- [x] Validate that the request does not contain inappropriate other filtering fields in the route. Do the actual filtering in the model.
+- [x] Write unit tests for the model that exercise this in different ways, so you can be assured different combinations of filtering will work.
+- [x] Write tests for the route that will ensure that it correctly validates the incoming request and uses the model method properly.
+- [x] Document all new code here clearly; this is functionality that future team members should be able to understand how to use from your docstrings.
 
 #### Filter Feature Refactor Plan
 
@@ -967,8 +968,6 @@ Find a way to do this where you don’t need to change the code of these routes,
 
 Update tests to demonstrate that these security changes are working.
 
-[Back to TOC](#jobly-table-of-contents)
-
 ### Users
 
 - Creating users should only permitted by admins (registration, however, should remain open to everyone).
@@ -976,6 +975,21 @@ Update tests to demonstrate that these security changes are working.
 - Getting information on a user, updating, or deleting a user should only be permitted either by an admin, or by that user.
 
 As before, write tests for this carefully.
+
+### Admin Authorization Refactor Plan
+
+1. Refactor `auth.js` (middleware) by adding an `ensureAdmin` function and add tests to `auth.test.js` as well.
+2. Implement the `ensureAdmin` function into the `companies.js` and `users.js` (routes) and add tests to `companies.test.js` and `users.test.js` as well.
+3. Create a new route in `auth.js` (routes) specifically for users to register with admin privileges that is protected by the `ensureAdmin` and `ensureLoggedIn` middleware which ensures that only existing admin users can create new admin users. Add necessary tests to `auth.test.js` (routes) as well.
+4. Update the `users.js` routes to ensure that the `user.js` routes are protected appropriately and allow admin users to create new users, including admin users.
+   - [x] `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {`
+5. NB-> an issue with the aforementioned approach is that if a new admin can only be added by an existing admin but there are zero admins due to the application being in its "infancy" then how do we create the "Prime Admin"?  I decided to create a temporary admin creation route in `auth.js` (routes) that allows the creation of an admin user without requiring an existing admin.  This route should be removed or disabled after the initial setup.
+  - I realize the application came with a test admin that was seeded by the installation steps but I wanted to attempt to solve the issue on my own without altering the original `sql` files.
+6. Refactoring `users.js` to achieve the new authentication & admin related criteria will require the following:
+   1. **Ensure that creating users is only permitted by admins**: This is already implemented with the `ensureAdmin` middleware on the `POST /` route.
+   2. **Ensure that registration remains open to everyone**: This is handled by the `auth.js` routes and does not need changes in `users.js`.
+   3. **Ensure that getting the list of all users is only permitted by admins**: Add the `ensureAdmin` middleware to the `GET /` route.
+   4. **Ensure that getting information on a user, updating, or deleting a user is only permitted either by an admin or by that user**: Create a new middleware function `ensureCorrectUserOrAdmin` to check if the user is either the correct user or an admin.  This will require tests as well.
 
 [Back to TOC](#jobly-table-of-contents)
 
