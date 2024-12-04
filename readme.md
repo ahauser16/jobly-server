@@ -1,42 +1,55 @@
 # Jobly Backend
 
 This is the Express backend for Jobly, version 2.
+
 ## [Jobly Table of Contents](#jobly-table-of-contents)
+
 - [Jobly Backend](#jobly-backend)
+  - [Jobly Table of Contents](#jobly-table-of-contents)
   - [startup instructions](#startup-instructions)
   - [assignment instructions](#assignment-instructions)
   - [**Goals \& Requirements**](#goals--requirements)
   - [Part One: Setup / Starter Code](#part-one-setup--starter-code)
-      - [`jobly.sql` explained](#joblysql-explained)
-      - [Instructions to Setting Up the Databases](#instructions-to-setting-up-the-databases)
-      - [Description of the Server Startup Process](#description-of-the-server-startup-process)
-      - [`app.js` and `app.test.js` explained](#appjs-and-apptestjs-explained)
-        - [Explanation of `app.js`](#explanation-of-appjs)
-        - [Explanation of `app.test.js`](#explanation-of-apptestjs)
-        - [Understanding `beforeEach` and `afterEach`](#understanding-beforeeach-and-aftereach)
-        - [Running Tests with Coverage and the `-i` Flag](#running-tests-with-coverage-and-the--i-flag)
-      - [`config.js` and `config.test.js` explained](#configjs-and-configtestjs-explained)
-        - [Explanation of `config.js`](#explanation-of-configjs)
-        - [Explanation of `config.test.js`](#explanation-of-configtestjs)
+    - [`jobly.sql` explained](#joblysql-explained)
+    - [Instructions to Setting Up the Databases](#instructions-to-setting-up-the-databases)
+    - [Description of the Server Startup Process](#description-of-the-server-startup-process)
+    - [`app.js` and `app.test.js` explained](#appjs-and-apptestjs-explained)
+      - [Explanation of `app.js`](#explanation-of-appjs)
+      - [Explanation of `app.test.js`](#explanation-of-apptestjs)
+      - [Understanding `beforeEach` and `afterEach`](#understanding-beforeeach-and-aftereach)
+      - [Running Tests with Coverage and the `-i` Flag](#running-tests-with-coverage-and-the--i-flag)
+    - [`config.js` and `config.test.js` explained](#configjs-and-configtestjs-explained)
+      - [Explanation of `config.js`](#explanation-of-configjs)
+      - [Explanation of `config.test.js`](#explanation-of-configtestjs)
       - [First Task: sqlForPartialUpdate](#first-task-sqlforpartialupdate)
-  - [Part Two: Companies](#part-two-companies)
+    - [Part Two: Companies](#part-two-companies)
       - [Adding Filtering](#adding-filtering)
       - [Some requirements:](#some-requirements)
+      - [Filter Feature Refactor Plan](#filter-feature-refactor-plan)
+        - [1. Update `GET /companies` Route in `companies.js`](#1-update-get-companies-route-in-companiesjs)
+        - [2. Update the `Company.findAll` Model Method](#2-update-the-companyfindall-model-method)
+        - [3. Test the Implementation](#3-test-the-implementation)
+          - [1. Refactor: `models/company.test.js`](#1-refactor-modelscompanytestjs)
+          - [2. Refactor: `routes/companies.test.js`](#2-refactor-routescompaniestestjs)
   - [Part Three: Change Authorization](#part-three-change-authorization)
     - [Companies](#companies)
     - [Users](#users)
     - [Admin Authorization Refactor Plan](#admin-authorization-refactor-plan)
+      - [`auth.js` \& `auth.test.js` (middleware)](#authjs--authtestjs-middleware)
+      - [`_testCommon.js` (routes)](#_testcommonjs-routes)
+      - [`companies.js` \& `companies.test.js` (routes)](#companiesjs--companiestestjs-routes)
+      - [`users.js` \& `users.test.js` (routes)](#usersjs--userstestjs-routes)
+      - [Postman test 12/3/24](#postman-test-12324)
   - [Part Four: Jobs](#part-four-jobs)
     - [Adding Job Model, Routes, and Tests](#adding-job-model-routes-and-tests)
-    - [Adding Filtering](#adding-filtering-1)
-    - [Show Jobs for a Company](#show-jobs-for-a-company)
+      - [Adding Filtering](#adding-filtering-1)
+      - [Show Jobs for a Company](#show-jobs-for-a-company)
   - [Step Five: Job Applications](#step-five-job-applications)
   - [Further Study](#further-study)
     - [Choosing Random Password](#choosing-random-password)
     - [Use *enum* Type](#useenumtype)
     - [Add Technologies for Jobs](#add-technologies-for-jobs)
     - [Add Technologies for Users](#add-technologies-for-users)
-
 
 ## startup instructions
 
@@ -199,7 +212,6 @@ Remember to Replace `your_username` with your PostgreSQL username. You may be pr
 
 - [x] After completing these steps, you should have both the `jobly` and `jobly_test` databases set up with the necessary schema and initial data.
 
-
 - [x] Read the tests and get an (I) understanding of what the (II) **_beforeEach_** and **_afterEach_** methods are specifically doing for our tests.
 
 (III) Run our tests, with coverage. Any time you run our tests here, you will need to use the `-i` flag for Jest, so that the tests run “in band” (in order, not at the same time).
@@ -207,6 +219,7 @@ Remember to Replace `your_username` with your PostgreSQL username. You may be pr
 [Back to TOC](#jobly-table-of-contents)
 
 ### Description of the Server Startup Process
+
 When you run the `command npm start`, it triggers the `start` script defined in the `package.json` file, which executes `node server.js`. This starts the server by performing the following steps:
 
 1. Load Configuration: The `config.js` file is loaded, which sets up environment variables and configuration settings such as the `SECRET_KEY`, `PORT`, and database URI.
@@ -291,10 +304,12 @@ const app = express();
 ```
 
 3. Middleware Setup
+
 - `cors()`: Enables CORS.
 - `express.json()`: Parses incoming JSON requests.
 - `morgan("tiny")`: Logs HTTP requests.
 - `authenticateJWT`: Authenticates JWT tokens for incoming requests.
+
 ```javascript
 app.use(cors());
 app.use(express.json());
@@ -303,7 +318,8 @@ app.use(authenticateJWT);
 ```
 
 4. Route Handlers
-Sets up route handlers for authentication, companies, and users.
+   Sets up route handlers for authentication, companies, and users.
+
 ```javascript
 app.use("/auth", authRoutes);
 app.use("/companies", companiesRoutes);
@@ -311,7 +327,8 @@ app.use("/users", usersRoutes);
 ```
 
 5. 404 Error Handling
-Handles requests to undefined routes by throwing a `NotFoundError`.
+   Handles requests to undefined routes by throwing a `NotFoundError`.
+
 ```javascript
 app.use(function (req, res, next) {
   return next(new NotFoundError());
@@ -319,7 +336,8 @@ app.use(function (req, res, next) {
 ```
 
 6. Generic Error Handler
-Handles any unhandled errors and returns a JSON response with the error message and status code.
+   Handles any unhandled errors and returns a JSON response with the error message and status code.
+
 ```javascript
 app.use(function (err, req, res, next) {
   if (process.env.NODE_ENV !== "test") console.error(err.stack);
@@ -333,6 +351,7 @@ app.use(function (err, req, res, next) {
 ```
 
 7. Export App
+
 ```javascript
 module.exports = app;
 ```
@@ -566,7 +585,6 @@ The route for listing all companies (**_GET /companies_**) works, but it current
 - [x] **_maxEmployees_**: filter to companies that have no more than that number of employees.
 - [x] If the **_minEmployees_** parameter is greater than the **_maxEmployees_** parameter, respond with a 400 error with an appropriate message.
 
-
 #### Some requirements:
 
 - [x] Do not solve this by issuing a more complex SELECT statement than is needed (for example, if the user isn’t filtering by **_minEmployees_** or **_maxEmployees_**, the SELECT statement should not include anything about the **_num_employees_**.
@@ -578,13 +596,18 @@ The route for listing all companies (**_GET /companies_**) works, but it current
 #### Filter Feature Refactor Plan
 
 1. Update `GET /companies` Route in `companies.js`
+
 - [x] Validate incoming query parameters (e.g., `minEmployees`, `maxEmployees`, `nameLike`).
 - [x] Ensure `minEmployees` is not greater than `maxEmployees`, and return a `400` error if so.
 - [x] Pass the valid filters to the `Company.findAll` model method.
+
 2. Update the `Company.findAll` Model Method
+
 - [x] Add logic to `Company.findAll` to dynamically filter the companies based on the provided parameters.
 - [x] Ensure only relevant filters are applied in the query.
+
 3. Test the Implementation
+
 - Write tests to cover various filter combinations in both the route and the model.
   - [x] `models/company.test.js` should test the filtering logic directly in the model's `findAll` method to ensure filters work independently of the API layer.
   - [x] `routes/companies.test.js` should test the integration of query parameters in the API route and verify that it correctly utilizes the `findAll` method in the model.
@@ -592,6 +615,7 @@ The route for listing all companies (**_GET /companies_**) works, but it current
 NB remember to restart the server before testing the refactored route.
 
 ##### 1. Update `GET /companies` Route in `companies.js`
+
 ```javascript
 /** GET / =>
  *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
@@ -614,7 +638,9 @@ router.get("/", async function (req, res, next) {
       const min = parseInt(minEmployees);
       const max = parseInt(maxEmployees);
       if (min > max) {
-        throw new BadRequestError("minEmployees cannot be greater than maxEmployees.");
+        throw new BadRequestError(
+          "minEmployees cannot be greater than maxEmployees."
+        );
       }
     }
 
@@ -632,6 +658,7 @@ router.get("/", async function (req, res, next) {
 ##### 2. Update the `Company.findAll` Model Method
 
 Modify the `Company.findAll` method in the `models/company.js` file to apply dynamic filtering.
+
 ```javascript
 /** Find all companies with optional filtering.
  *
@@ -686,15 +713,19 @@ static async findAll(filters = {}) {
 ```
 
 ##### 3. Test the Implementation
+
 To thoroughly test the new filtering feature, you should add tests to both the `routes/companies.test.js` and `models/company.test.js` files:
 
 1. `models/company.test.js` should test the filtering logic directly in the model's `findAll` method to ensure filters work independently of the API layer.
 2. `routes/companies.test.js` should test the integration of query parameters in the API route and verify that it correctly utilizes the `findAll` method in the model.
 
 ###### 1. Refactor: `models/company.test.js`
+
 Add new test cases for the `findAll` method with various filter scenarios:
+
 - Verifies that the filtering logic in the `findAll` model works independently.
 - Ensures the database query behaves as expected for each filter.
+
 ```javascript
 /************************************** findAll with filters */
 
@@ -794,7 +825,11 @@ describe("findAll with filters", function () {
   });
 
   test("works: multiple filters", async function () {
-    let companies = await Company.findAll({ minEmployees: 2, maxEmployees: 3, nameLike: "3" });
+    let companies = await Company.findAll({
+      minEmployees: 2,
+      maxEmployees: 3,
+      nameLike: "3",
+    });
     expect(companies).toEqual([
       {
         handle: "c3",
@@ -823,9 +858,12 @@ describe("findAll with filters", function () {
 ```
 
 ###### 2. Refactor: `routes/companies.test.js`
+
 Add tests to the `GET /companies` route to verify that filters are applied correctly:
+
 - Tests the integration of query parameters in the route.
 - Ensures that the API correctly validates inputs, handles errors, and delegates filtering to the model.
+
 ```javascript
 /************************************** GET /companies with filters */
 
@@ -923,7 +961,9 @@ describe("GET /companies with filters", function () {
   });
 
   test("works: multiple filters", async function () {
-    const resp = await request(app).get("/companies?minEmployees=2&maxEmployees=3&nameLike=c3");
+    const resp = await request(app).get(
+      "/companies?minEmployees=2&maxEmployees=3&nameLike=c3"
+    );
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual({
       companies: [
@@ -939,9 +979,13 @@ describe("GET /companies with filters", function () {
   });
 
   test("fails: invalid filter range", async function () {
-    const resp = await request(app).get("/companies?minEmployees=5&maxEmployees=3");
+    const resp = await request(app).get(
+      "/companies?minEmployees=5&maxEmployees=3"
+    );
     expect(resp.statusCode).toEqual(400);
-    expect(resp.body.error.message).toEqual("minEmployees cannot be greater than maxEmployees.");
+    expect(resp.body.error.message).toEqual(
+      "minEmployees cannot be greater than maxEmployees."
+    );
   });
 
   test("works: no results for filters", async function () {
@@ -950,7 +994,6 @@ describe("GET /companies with filters", function () {
     expect(resp.body).toEqual({ companies: [] });
   });
 });
-
 ```
 
 [Back to TOC](#jobly-table-of-contents)
@@ -978,18 +1021,40 @@ As before, write tests for this carefully.
 
 ### Admin Authorization Refactor Plan
 
-1. Refactor `auth.js` (middleware) by adding an `ensureAdmin` function and add tests to `auth.test.js` as well.
-2. Implement the `ensureAdmin` function into the `companies.js` and `users.js` (routes) and add tests to `companies.test.js` and `users.test.js` as well.
-3. Create a new route in `auth.js` (routes) specifically for users to register with admin privileges that is protected by the `ensureAdmin` and `ensureLoggedIn` middleware which ensures that only existing admin users can create new admin users. Add necessary tests to `auth.test.js` (routes) as well.
-4. Update the `users.js` routes to ensure that the `user.js` routes are protected appropriately and allow admin users to create new users, including admin users.
-   - [x] `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {`
-5. NB-> an issue with the aforementioned approach is that if a new admin can only be added by an existing admin but there are zero admins due to the application being in its "infancy" then how do we create the "Prime Admin"?  I decided to create a temporary admin creation route in `auth.js` (routes) that allows the creation of an admin user without requiring an existing admin.  This route should be removed or disabled after the initial setup.
-  - I realize the application came with a test admin that was seeded by the installation steps but I wanted to attempt to solve the issue on my own without altering the original `sql` files.
-6. Refactoring `users.js` to achieve the new authentication & admin related criteria will require the following:
-   1. **Ensure that creating users is only permitted by admins**: This is already implemented with the `ensureAdmin` middleware on the `POST /` route.
-   2. **Ensure that registration remains open to everyone**: This is handled by the `auth.js` routes and does not need changes in `users.js`.
-   3. **Ensure that getting the list of all users is only permitted by admins**: Add the `ensureAdmin` middleware to the `GET /` route.
-   4. **Ensure that getting information on a user, updating, or deleting a user is only permitted either by an admin or by that user**: Create a new middleware function `ensureCorrectUserOrAdmin` to check if the user is either the correct user or an admin.  This will require tests as well.
+#### `auth.js` & `auth.test.js` (middleware)
+
+- [x] Refactor `auth.js` (middleware) by adding an `ensureAdmin` function.
+  - [x] Add tests to `auth.test.js` as well.
+- [x] Create a new route in `auth.js` (routes) called `register-admin` specifically for users to register with admin privileges that is protected by the `ensureAdmin` and `ensureLoggedIn` middleware which ensures that only existing admin users can create new admin users.
+  - [x] Add necessary tests to `auth.test.js` (routes) as well.
+- [x] an issue with the aforementioned approach is that if a new admin can only be added by an existing admin but there are zero admins due to the application being in its "infancy" then how do we create the "Prime Admin"? I decided to create a **temporary admin creation route** in `auth.js` (routes) that allows the creation of an admin user without requiring an existing admin. This route should be removed or disabled after the initial setup. I realize the application came with a test admin that was seeded by the installation steps but I wanted to attempt to solve the issue on my own without altering the original `sql` files.
+
+#### `_testCommon.js` (routes)
+
+- [x] I added a new testing variable in `_testCommon.js` (routes) called `adminToken` (e.g. `const adminToken = createToken({ username: "admin", isAdmin: true });`) which is used by `companies.test.js`.
+
+#### `companies.js` & `companies.test.js` (routes)
+
+Refactoring `companies.js` and `companies.test.js` to achieve the aforementioned new authentication & admin related criteria will require the following:
+
+- [x] Implement the `ensureAdmin` function into the `companies.js` (routes).
+  - [x] add tests to `companies.test.js` that test the `ensureAdmin` function works correctly by verifying that only admin users can create, update, and delete companies, while non-admin users and anonymous users are not authorized to perform these actions. Keep in mind these tests do not test the `ensureAdmin` directly which is done in the `users.test.js` file.
+
+#### `users.js` & `users.test.js` (routes)
+
+Refactoring `users.js` and `users.test.js` to achieve the aforementioned new authentication & admin related criteria will require the following:
+
+- [x] **Ensure that creating users is only permitted by admins**: This is already implemented with the `ensureAdmin` middleware on the `POST /` route.
+  - [x] Updated the `users.js` routes to ensure that the `users.js` routes are protected appropriately and allow admin users to create new users, including admin users (e.g. `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {`).
+- [x] **Ensure that registration remains open to everyone**: This is handled by the `auth.js` routes and does not need changes in `users.js`.
+- [x] **Ensure that getting the list of all users is only permitted by admins**: Add the `ensureAdmin` middleware to the `GET /` route.
+- [x] **Ensure that getting information on a user, updating, or deleting a user is only permitted either by an admin or by that user**: Create a new _middleware_ function `ensureCorrectUserOrAdmin` to check if the user is either the correct user or an admin.
+  - [ ] This will require tests as well.
+
+#### Postman test 12/3/24
+
+I tested each route using Postman which I documented in the `README.MD` file within the `routes` subfolder which I omitted from this `README.MD` file for the sake of brevity.
+
 
 [Back to TOC](#jobly-table-of-contents)
 

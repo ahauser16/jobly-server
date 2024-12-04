@@ -4,382 +4,549 @@ Postman workspace located here: `https://winter-shadow-436327.postman.co/workspa
 
 ## Table of Contents
 
-- [routes folder file notes/explanations/diagrams](#routes-folder-file-notesexplanationsdiagrams)
-  - [Postman Notes](#postman-notes)
-    - [Registeration of New User](#registeration-of-new-user)
-    - [Authentication of Registered User](#authentication-of-registered-user)
-    - [User-Add New User-Request Sent By Admin](#user-add-new-user-request-sent-by-admin)
-    - [User-Retrieve All Users](#user-retrieve-all-users)
-    - [User-Retrieve User By Username](#user-retrieve-user-by-username)
-    - [User-Update User Data By Username](#user-update-user-data-by-username)
-    - [User-Delete User Data By Username](#user-delete-user-data-by-username)
-    - [Company-Add New](#company-add-new)
-    - [Company-Retrieve All Companies](#company-retrieve-all-companies)
-    - [Company-Retrieve Company By Handle](#company-retrieve-company-by-handle)
-    - [Company-Update Company Data By Handle](#company-update-company-data-by-handle)
-    - [Company-Delete Company By Handle](#delete-company-by-company-handle)
-  - [Tests](#tests)
-  - [\_testCommon.js](#_testcommonjs)
-    - [\_testCommon.js diagram](#_testcommonjs-diagram)
-    - [\_testCommon.js diagram explanation](#_testcommonjs-diagram-explanation)
-    - [\_testCommon.js code overview](#_testcommonjs-code-overview)
-  - [auth.test.js](#authtestjs)
-    - [auth.test.js sequence diagram](#authtestjs-sequence-diagram)
-    - [auth.test.js diagram explanation](#authtestjs-diagram-explanation)
-    - [auth.test.js code overview](#authtestjs-code-overview)
-  - [companies.test.js](#companiestestjs)
-    - [companies.test.js diagram](#companiestestjs-diagram)
-    - [companies.test.js diagram explanation](#companiestestjs-diagram-explanation)
-    - [companies.test.js code overview](#companiestestjs-code-overview)
-  - [users.test.js](#userstestjs)
-    - [users.test.js diagram](#userstestjs-diagram)
-    - [users.test.js diagram explanation](#userstestjs-diagram-explanation)
-    - [users.test.js Code Overview](#userstestjs-code-overview)
-  - [Scripts](#scripts)
-  - [auth.js](#authjs)
-    - [auth.js sequence diagram](#authjs-sequence-diagram)
-    - [auth.js diagram explanation](#authjs-diagram-explanation)
-    - [auth.js Code Overview](#authjs-code-overview)
-  - [companies.js](#companiesjs)
-    - [companies.js sequence diagram](#companiesjs-sequence-diagram)
-    - [companies.js diagram explanation](#companiesjs-diagram-explanation)
-    - [companies.js Code Overview](#companiesjs-code-overview)
-  - [users.js](#usersjs)
-    - [users.js sequence diagram](#usersjs-sequence-diagram)
-    - [users.js diagram explanation](#usersjs-diagram-explanation)
-    - [users.js code overview](#usersjs-code-overview)
+- [`routes` folder file notes/explanations/diagrams](#routes-folder-file-notesexplanationsdiagrams)
+  - [Table of Contents](#table-of-contents)
+    - [Tests](#tests)
+    - [Postman Notes](#postman-notes)
+      - [1. Register the First Admin User](#1-register-the-first-admin-user)
+      - [2. Authenticate the Prime Admin user](#2-authenticate-the-prime-admin-user)
+      - [3. Register a Regular User](#3-register-a-regular-user)
+      - [4. Authenticate the Regular User](#4-authenticate-the-regular-user)
+      - [5. Register a Second Admin User (Using the Prime Admin Token from Step 2)](#5-register-a-second-admin-user-using-the-prime-admin-token-from-step-2)
+      - [6. Authenticate the Second Admin User](#6-authenticate-the-second-admin-user)
+      - [7. Create a New User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6):](#7-create-a-new-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [8. Get Information on a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#8-get-information-on-a-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [9.  Get Information on a User (Using the User Token from Step 4)](#9--get-information-on-a-user-using-the-user-token-from-step-4)
+      - [10. Retrieve All Users (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#10-retrieve-all-users-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [11. Update a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#11-update-a-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [12. Update a User (Using the User Token from Step 4)](#12-update-a-user-using-the-user-token-from-step-4)
+      - [13. Delete a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#13-delete-a-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [14. Delete a User (Using the User Token from Step 4)](#14-delete-a-user-using-the-user-token-from-step-4)
+      - [15. Create a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#15-create-a-company-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [16. Get All Companies](#16-get-all-companies)
+      - [17. Get Company by Handle](#17-get-company-by-handle)
+      - [18. Update a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#18-update-a-company-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [19. Delete a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#19-delete-a-company-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+    - [\_testCommon.js](#_testcommonjs)
+      - [\_testCommon.js diagram](#_testcommonjs-diagram)
+      - [\_testCommon.js diagram explanation](#_testcommonjs-diagram-explanation)
+      - [\_testCommonjs code overview](#_testcommonjs-code-overview)
+    - [auth.test.js](#authtestjs)
+      - [auth.test.js sequence diagram](#authtestjs-sequence-diagram)
+      - [auth.test.js diagram explanation](#authtestjs-diagram-explanation)
+      - [auth.test.js code overview](#authtestjs-code-overview)
+    - [companies.test.js](#companiestestjs)
+      - [companies.test.js diagram](#companiestestjs-diagram)
+      - [companies.test.js diagram explanation](#companiestestjs-diagram-explanation)
+      - [companies.test.js code overview](#companiestestjs-code-overview)
+    - [users.test.js](#userstestjs)
+      - [users.test.js Diagram](#userstestjs-diagram)
+      - [users.test.js diagram explanation](#userstestjs-diagram-explanation)
+      - [users.test.js code overview](#userstestjs-code-overview)
+    - [Scripts](#scripts)
+    - [auth.js](#authjs)
+      - [auth.js sequence diagram](#authjs-sequence-diagram)
+      - [auth.js diagram explanation](#authjs-diagram-explanation)
+      - [auth.js code overview](#authjs-code-overview)
+    - [companies.js](#companiesjs)
+      - [companies.js sequence diagram](#companiesjs-sequence-diagram)
+      - [companies.js diagram explanation](#companiesjs-diagram-explanation)
+      - [companies.js code overview](#companiesjs-code-overview)
+    - [users.js](#usersjs)
+      - [users.js sequence diagram](#usersjs-sequence-diagram)
+      - [users.js diagram explanation](#usersjs-diagram-explanation)
+      - [users.js code overview](#usersjs-code-overview)
 
 ### Tests
 
 ### Postman Notes
 
-The `jobly` database has the test user account `username: newuser5000` with `password: password123abc` which was created to test the `http://localhost:3001/auth/register` route that (1) registers a new user and (2) returns a JWT token and then used to test the `http://localhost:3001/auth/token` route that (1) authenticates a registered user and (2) returns a JWT token. The full json body of each Postman request that initially registered and authenticated "newuser5000" as well as the token created during registeration and authentication.
+The following is a walkthrough of testing each of the routes in `auth.js`, `companies.js` and `users.js` that satisfy the requirements listed in [Part Three: Change Authorization](#part-three-change-authorization) of the assignment that can be found in the main `README.MD` file of the repository. They are presented in a particular order to ensure that the necessary prerequisites are met for each request. I included notes that are more detailed if I experienced unexpected errors or undesirable behavior. This can also be used as a reminder for how to test these routes for the future.
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+#### 1. Register the First Admin User
 
-#### Registeration of New User
-`POST /auth/register:   { user } => { token }`
-- user must include { username, password, firstName, lastName, email }
-- Returns JWT token which can be used to authenticate further requests.
-- Authorization required: none
-
-json body associated with Postman request: `http://localhost:3001/auth/register`
-```json
-{
-  "username": "newuser5000",
-  "password": "password123abc",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "jdoe@example.com"
-}
-```
-
-json token generated from Postman request: `http://localhost:3001/auth/register`
+- File Name: `auth.js`
+- Route Declaration: `router.post("/register-first-admin", async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/auth/register-first-admin`
+- Request Headers: None
+- Request Body:
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI1MDAwIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMjY0MDYwMX0.1dWhBf67W-Co7zvlIUcfqnPPJYjJOnk7y-NC7oloBls"
+  "username": "primeAdminUser",
+  "password": "adminPass123",
+  "firstName": "First",
+  "lastName": "Admin",
+  "email": "fadmin@example.com"
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+- Description: This request registers the first admin user ("Prime Admin"). This step is necessary to create the initial admin user who can then create other admin users. Normally after this route is used once it should be deactivated and removed from the codebase because the route cannot be protected like the others. The alternative would be to seed the database with a "prime admin" username/password who would then create other admins as needed. This request returns a JWT token which will be **NOT** be needed to authenticate the Prime Admin in the next POST request.
 
-#### Authentication of Registered User
-`POST /auth/token:  { username, password } => { token }`
-- Returns JWT token which can be used to authenticate further requests.
-- Authorization required: none
+#### 2. Authenticate the Prime Admin user
 
-json body associated with Postman request: `http://localhost:3001/auth/token`
+- File Name: `auth.js`
+- Route Declaration: `router.post("/token", async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/auth/token`
+- Request Headers: None
+- Request Body:
+
 ```json
-{
-  "username": "newuser5000",
-  "password": "password123abc"
-}
+  "username": "primeAdminUser",
+  "password": "adminPass123",
 ```
 
-json token generated from Postman request: `http://localhost:3001/auth/token`
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI1MDAwIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMjY0MDkzMn0.WK6UEUWQshznsM9s_f5Q5Nk9pXyiXqikC71nZp_RW9c"
-}
-```
-
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
-
-#### User-Add New User-Request Sent By Admin
-
-`POST / { user }  => { user, token }`
-
-- Authorization required: login
-- Adds a new user, however, this is not the registration endpoint. Instead, this route is only for admin users to add new users. The new user being added can be an admin. This returns the newly created user and an authentication token (see below).
-
-example of json body:
+- Description: This request authenticates the admin user and returns a JWT token. Save this token for use in subsequent requests:
 
 ```json
 {
-  "username": "newuser7000",
-  "password": "newpassword123abc",
-  "firstName": "Jane",
-  "lastName": "Doe",
-  "email": "janedoe@example.com",
-  "isAdmin": true
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InByaW1lQWRtaW5Vc2VyIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzMzMjY1MDE3fQ.RV-oVMU_oyQl_8XAPq0avvfNp48a5BK5xeJMMEDuTKI"
 }
 ```
 
-example of json response
+#### 3. Register a Regular User
+
+- File Name: `auth.js`
+- Route Declaration: `router.post("/register", async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/auth/register`
+- Request Headers: None
+- Request Body:
+
+```json
+{
+  "username": "regularUser987",
+  "password": "userPass123",
+  "firstName": "Regular",
+  "lastName": "User",
+  "email": "regular@example.com"
+}
+```
+
+- Description: This request registers a regular user. This step is necessary to create a user who can later authenticate (e.g. in the following request) and perform user-specific actions.
+
+#### 4. Authenticate the Regular User
+
+- File Name: `auth.js`
+- Route Declaration: `router.post("/token", async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/auth/token`
+- Request Headers: None
+- Request Body:
+
+```json
+{
+  "username": "regularUser987",
+  "password": "userPass123"
+}
+```
+
+- Description: This request authenticates the regular user and returns a JWT token. Save this token for use in subsequent requests:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJlZ3VsYXJVc2VyOTg3IiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMzI2NTU3Mn0.vIgz5pWKPqCD4KrU7ndCITURtg3XiyVWqcM1yP12ejw"
+}
+```
+
+#### 5. Register a Second Admin User (Using the Prime Admin Token from Step 2)
+
+- File Name: `auth.js`
+- Route Declaration: `router.post("/register-admin", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/auth/register-admin`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2)
+- Request Body:
+
+```json
+{
+  "username": "secondAdmin987",
+  "password": "adminPass2",
+  "firstName": "Second",
+  "lastName": "Admin",
+  "email": "secondadmin@example.com"
+}
+```
+
+- Description: This request registers a second admin user. Only an authenticated admin can create another admin.
+
+#### 6. Authenticate the Second Admin User
+
+- File Name: `auth.js`
+- Route Declaration: `router.post("/token", async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/auth/token`
+- Request Headers: None
+- Request Body:
+
+```json
+  "username": "secondAdmin987",
+  "password": "adminPass2"
+```
+
+- Description: This request authenticates the second admin user and returns a JWT token. Save this token for use in subsequent requests:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNlY29uZEFkbWluOTg3IiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzMzMjY2MjAwfQ.VMEXO5y-VwG35gVo27L89q_Uj_u4QTUZe5-yeXASxPg"
+}
+```
+
+#### 7. Create a New User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6):
+
+- File Name: `users.js`
+- Route Declaration: `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/users`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Request Body:
+
+```json
+{
+  "username": "newUser987",
+  "password": "newUserPass",
+  "firstName": "New",
+  "lastName": "User",
+  "email": "newuser@example.com",
+  "isAdmin": false
+}
+```
+
+- Description: This request creates a new user. Only an authenticated admin can create a new user. The output should look like the following:
 
 ```json
 {
   "user": {
-    "username": "newuser7000",
-    "firstName": "Jane",
-    "lastName": "Doe",
-    "email": "janedoe@example.com",
-    "isAdmin": true
+    "username": "newUser987",
+    "firstName": "New",
+    "lastName": "User",
+    "email": "newuser@example.com",
+    "isAdmin": false
   },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI3MDAwIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzMyNjY0NDA0fQ.l78XK8H9jxoQ_oAu5-0jlHiAYtS6tfTtx0BzYXSmgRE"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld1VzZXI5ODciLCJpc0FkbWluIjpmYWxzZSwiaWF0IjoxNzMzMjY2NjIyfQ.vbyHZB_7nJSCtBBCLZTbQMCbfLmek_mpi0D0CppBKWs"
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+#### 8. Get Information on a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
 
-#### User-Retrieve All Users
-`GET / => { users: [ {username, firstName, lastName, email }, ... ] }`
-- Returns list of all users.
-- Authorization required: login
+- File Name: `users.js`
+- Route Declaration: `router.get("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/users/regularUser987`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Description: This request retrieves information on the user "regularUser987". Only an authenticated admin or the user themselves can access this information the latter of which will be demonstrated in the next step. The output from this request looks like this:
 
-I successfully sent a GET request to the `http://localhost:3001/users` route using the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the json response is below.
-
-json response example:
 ```json
 {
-    "users": [
-        {
-            "username": "newuser",
-            "firstName": "New",
-            "lastName": "User",
-            "email": "newuser@example.com",
-            "isAdmin": false
-        },
-        {
-            "username": "newuser5000",
-            "firstName": "John",
-            "lastName": "Doe",
-            "email": "jdoe@example.com",
-            "isAdmin": false
-        },
-        {
-            "username": "newuser7000",
-            "firstName": "Jane",
-            "lastName": "Doe",
-            "email": "janedoe@example.com",
-            "isAdmin": true
-        },
-        {
-            "username": "testadmin",
-            "firstName": "Test",
-            "lastName": "Admin!",
-            "email": "joel@joelburton.com",
-            "isAdmin": true
-        },
-        {
-            "username": "testuser",
-            "firstName": "Test",
-            "lastName": "User",
-            "email": "joel@joelburton.com",
-            "isAdmin": false
-        }
-    ]
+  "user": {
+    "username": "regularUser987",
+    "firstName": "Regular",
+    "lastName": "User",
+    "email": "regular@example.com",
+    "isAdmin": false
+  }
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+#### 9.  Get Information on a User (Using the User Token from Step 4)
 
-#### User-Retrieve User By Username
-`GET /[username] => { user }`
- - Returns `{ username, firstName, lastName, isAdmin }`
- - Authorization required: login
+- File Name: `users.js`
+- Route Declaration: `router.get("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/users/regularUser987`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <userToken>` (replace `<userToken>` with the token received in Step 4)
+- Description: This request retrieves information on the user "regularUser987". Only an authenticated admin or the user themselves can access this information. The output from this request looks like this:
 
-I successfully made a Postman GET request to `http://localhost:3001/users` that queried the dataset for the user name "newuser5000" and the final query URL is: `http://localhost:3001/users/newuser5000`.  I used the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the json response is below.
+```json
+{
+  "user": {
+    "username": "regularUser987",
+    "firstName": "Regular",
+    "lastName": "User",
+    "email": "regular@example.com",
+    "isAdmin": false
+  }
+}
+```
 
-example of response:
+#### 10. Retrieve All Users (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+
+- File Name: `users.js`
+- Route Declaration: `router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/users`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken> `(replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Description: This request retrieves a list of all users. Only an authenticated admin can access this information. The output from this request looks like this:
+
+```json
+{
+  "users": [
+    {
+      "username": "GOD",
+      "firstName": "arthur",
+      "lastName": "hauser",
+      "email": "arthur.hauser@gmail.com",
+      "isAdmin": true
+    },
+    {
+      "username": "newAdmin",
+      "firstName": "New",
+      "lastName": "Admin",
+      "email": "newadmin@example.com",
+      "isAdmin": true
+    },
+    {
+      "username": "newRegularUser5000",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "jdoe@example.com",
+      "isAdmin": false
+    },
+    {
+      "username": "newUser987",
+      "firstName": "New",
+      "lastName": "User",
+      "email": "newuser@example.com",
+      "isAdmin": false
+    }
+  ]
+}
+```
+
+#### 11. Update a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+
+- File Name: `users.js`
+- Route Declaration: `router.patch("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
+- Request Type: **PATCH**
+- URL: `http://localhost:3001/users/regularUser987`
+- Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Body:
+
+```json
+{
+  "firstName": "Regular-Updated",
+  "lastName": "User-Updated",
+  "email": "regular-updated@example.com"
+}
+```
+
+- Description: This request updates the user "regularUser987". Only an authenticated admin or the user themselves can update user information. The output from this request looks like this:
+
+```json
+{
+  "user": {
+    "username": "regularUser987",
+    "firstName": "Regular-Updated",
+    "lastName": "User-Updated",
+    "email": "regular-updated@example.com",
+    "isAdmin": false
+  }
+}
+```
+
+#### 12. Update a User (Using the User Token from Step 4)
+
+- File Name: `users.js`
+- Route Declaration: `router.patch("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
+- Request Type: **PATCH**
+- URL: `http://localhost:3001/users/regularUser987`
+- Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <userToken>` (replace `<userToken>` with the token received in Step 4)
+- Body:
+
+```json
+{
+  "firstName": "Regular-Updated-Again",
+  "lastName": "User-Updated-Again",
+  "email": "regular-updated-again@example.com"
+}
+```
+
+- Description: This request updates the user "regularUser987". Only an authenticated admin or the user themselves can update user information.   The output from the request looks like this: 
 ```json
 {
     "user": {
-        "username": "newuser5000",
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "jdoe@example.com",
+        "username": "regularUser987",
+        "firstName": "Regular-Updated-Again",
+        "lastName": "User-Updated-Again",
+        "email": "regular-updated-again@example.com",
         "isAdmin": false
     }
 }
 ```
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-#### User-Update User Data By Username
-`PATCH /[username] { user } => { user }`
-- Data can include: `{ firstName, lastName, password, email }`
-- Returns `{ username, firstName, lastName, email, isAdmin }`
-- Authorization required: login
- 
-I successfully made a Postman PATCH request to `http://localhost:3001/users` that queried the dataset for the user name "newuser5000", updated that user's `firstName`, `lastName` and `email` and so the final query URL is: `http://localhost:3001/users/newuser5000`.  I used the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the json body for the request and the response is below.
-
-example of json body for the request:
+#### 13. Delete a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+- File Name: `users.js`
+- Route Declaration: `router.delete("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
+- Request Type: **DELETE**
+- URL: `http://localhost:3001/users/newUser987`
+- Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Description: This request deletes the user "newUser987" which was created in Step 7 by an Admin- not by the user themselves, and for the purposes of testing this route it doesn't make a difference. Only an authenticated admin or the user themselves can delete user information.  The output from the request looks like this: 
 ```json
 {
-    "firstName": "UpdatedFirstName",
-    "lastName": "UpdatedLastName",
-    "email": "updated@example.com"
+    "deleted": "newUser987"
 }
 ```
 
-example of json response:
+#### 14. Delete a User (Using the User Token from Step 4)
+- File Name: `users.js`
+- Route Declaration: `router.delete("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
+- Request Type: **DELETE**
+- URL: `http://localhost:3001/users/regularUser987`
+- Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <userToken>` (replace `<userToken>` with the token received in Step 4)
+- Description: This request deletes the user "regularUser987". Only an authenticated admin or the user themselves can delete user information.  The output from the request looks like this: 
 ```json
 {
-    "user": {
-        "username": "newuser5000",
-        "firstName": "UpdatedFirstName",
-        "lastName": "UpdatedLastName",
-        "email": "updated@example.com",
-        "isAdmin": false
-    }
+    "deleted": "regularUser987"
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
----
-#### User-Delete User Data By Username
-`DELETE /[username]  =>  { deleted: username }`
-- Authorization required: login
-I successfully made a Postman DELETE request to `http://localhost:3001/users` that queried the dataset for the user name "newuser7000", deleted that user and so the final query URL is: `http://localhost:3001/users/newuser7000`.  I used the same `Authorization` header value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in.  An example of the  response is below.
+#### 15. Create a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
 
-example of body of request:
-```json
-{
-    "deleted": "newuser7000"
-}
-```
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
-
-
----
-#### Company-Add New
-`POST / { company } =>  { company }`
-- company should be `{ handle, name, description, numEmployees, logoUrl }`
-- Returns `{ handle, name, description, numEmployees, logoUrl }`
-- Authorization required: login
-
-I successfully sent a POST request to the `http://localhost:3001/companies` route using the same `Authorization` value that I used for the registeration and authorization Postman requests since this route requires the user to be logged in. The json body and json response is below with the test company information. Keep in mind this "exampleco" is the default company handle to delete in the DELETE Company By Handle route [below](#delete-company-by-company-handle)
-
-json body associated with Postman request: `http://localhost:3001/companies`
+- File Name: `companies.js`
+- Route Declaration: `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/companies`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Request Body:
 
 ```json
 {
-  "handle": "exampleco",
-  "name": "Example Company",
-  "description": "This is an example company.",
+  "handle": "newco987",
+  "name": "New Company",
+  "description": "This is a new company.",
   "numEmployees": 100,
-  "logoUrl": "http://example.com/logo.png"
+  "logoUrl": "http://newco.img"
 }
 ```
 
-json token generated from Postman request: `http://localhost:3001/auth/token`
+- Description: This request creates a new company. Only an _authenticated admin_ can create a new company. The output from this request looks like this:
 
 ```json
 {
   "company": {
-    "handle": "exampleco",
-    "name": "Example Company",
-    "description": "This is an example company.",
+    "handle": "newco987",
+    "name": "New Company",
+    "description": "This is a new company.",
     "numEmployees": 100,
-    "logoUrl": "http://example.com/logo.png"
+    "logoUrl": "http://newco.img"
   }
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+#### 16. Get All Companies
 
-#### Company-Retrieve All Companies
-`GET / => { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }`
-- Can filter on provided search filters:
-  - `minEmployees`
-  - `maxEmployees`
-  - `nameLike` (will find case-insensitive, partial matches)
-- Authorization required: none
- 
-I successfully sent a GET request to the `http://localhost:3001/companies` route and added logic to the `companies.js` route and `company.js` model that allows filtering using the `minEMployees`, `nameLike` and `maxEmployees` params in Postman. The following example queries the API dataset for a company's name that contains the term "hall" and has between 700 and 750 employees `http://localhost:3001/companies?minEmployees=700&nameLike=hall&maxEmployees=750`. The user was not required to be logged in to make this request.
+- File Name: `companies.js`
+- Route Declaration: `router.get("/", async function (req, res, next) { ... });`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/companies`
+- Request Headers: None
+- Description: This request retrieves a list of all companies. No authentication is required for this request. Additionally, there are three parameters that can be appended to the Request URL that can filter the results by the (1) minimum number of employees (`minEmployees`), (2) maximum number of employees (`maxEmployees`) and (3) a keyword contained within the name of the company (`nameLike`). The following is an example of querying the database for all companies that have a minimum of 150 employees, a maximum of 200 employees and contains the term "hall" in the company name: `http://localhost:3001/companies?minEmployees=150&nameLike=hall&maxEmployees=250`. The following is the result from the aforementioned query:
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+```json
+{
+  "companies": [
+    {
+      "handle": "hall-davis",
+      "name": "hall-davis Updated v2",
+      "description": "Updated description for the company.",
+      "numEmployees": 200,
+      "logoUrl": "http://example.com/newlogo.png"
+    }
+  ]
+}
+```
 
-#### Company-Retrieve Company By Handle
-`GET /[handle]  =>  { company }`
-- Company is `{ handle, name, description, numEmployees, logoUrl, jobs }` where jobs is `[{ id, title, salary, equity }, ...]`
-- Authorization required: none
+#### 17. Get Company by Handle
 
-I successfully sent a GET request to the `http://localhost:3001/companies` route to search for a company with the `handle` value of "hall-davis" so the complete URL of the request is `http://localhost:3001/companies/hall-davis`. An example of the json response is below. The user was not required to be logged in to make this request.
-
-example response from GET request
+- File Name: `companies.js`
+- Route Declaration: `router.get("/:handle", async function (req, res, next) { ... });`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/companies/newco987`
+- Request Headers: None
+- Description: This request retrieves information on the company with the handle "newco987". No authentication is required for this request. The following is the result from the aforementioned query:
 
 ```json
 {
   "company": {
-    "handle": "hall-davis",
-    "name": "Hall-Davis",
-    "description": "Adult go economic off into. Suddenly happy according only common. Father plant wrong free traditional.",
-    "numEmployees": 749,
-    "logoUrl": "/logos/logo2.png"
+    "handle": "newco987",
+    "name": "New Company",
+    "description": "This is a new company.",
+    "numEmployees": 100,
+    "logoUrl": "http://newco.img"
   }
 }
 ```
 
-example response from DELETE request
+#### 18. Update a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+
+- File Name: `companies.js`
+- Route Declaration: `router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
+- Request Type: **PATCH**
+- Request URL: `http://localhost:3001/companies/newco987`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Request Body:
 
 ```json
 {
-  "deleted": "exampleco"
+  "name": "New Company",
+  "description": "This is a new company.",
+  "numEmployees": 100,
+  "logoUrl": "http://newco.img"
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
-
-#### Company-Update Company Data By Handle
-`PATCH /[handle] { fld1, fld2, ... } => { company }`
-- Patches company data.
-- fields can be: `{ name, description, numEmployees, logo_url }`
-- Returns `{ handle, name, description, numEmployees, logo_url }`
-- Authorization required: login
-
-I successfully sent a PATCH request to the `http://localhost:3001/companies` route to update the company with the `handle` value of "hall-davis" so the complete URL of the request is `http://localhost:3001/companies/hall-davis`. The request included the `json` body below and required the user to be logged in so I used the same token value as the initial registration/authentication of the user below. An example of the json response is below.
-
-**`Content-Type`**: `application/json`
-**`Authentication` header value**: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5ld3VzZXI1MDAwIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTczMjY0MDkzMn0.WK6UEUWQshznsM9s_f5Q5Nk9pXyiXqikC71nZp_RW9c`
-
-**example response from request**
+- Description: This request updates the company "newco987". Only an authenticated admin can update a company. The resulting output looks like this:
 
 ```json
 {
   "company": {
-    "handle": "hall-davis",
-    "name": "hall-davis Updated",
-    "description": "Updated description for the company.",
-    "numEmployees": 200,
-    "logoUrl": "http://example.com/newlogo.png"
+    "handle": "newco987",
+    "name": "New Company updated 4 testing",
+    "description": "This is a new company.",
+    "numEmployees": 100,
+    "logoUrl": "http://newco.img"
   }
 }
 ```
 
-[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+#### 19. Delete a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
 
-#### Company-Delete Company By Handle
-`DELETE /[handle]  =>  { deleted: handle }`
-- Authorization: login
-I successfully sent a DELETE request to the `http://localhost:3001/companies` route to delete the company with the `handle` value of "exampleco" so the complete URL of the request is `http://localhost:3001/companies/exampleco`. The request required the user to be logged in so I used the same token value as the initial registration/authentication of the user below. An example of the json response is below.
-
-example of company response:
+- File Name: `companies.js`
+- Route Declaration: `router.delete("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
+- Request Type: **DELETE**
+- Request URL: `http://localhost:3001/companies/newco`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Description: This request deletes the company "newco". Only an authenticated admin can delete a company. The resulting output looks like this:
 
 ```json
 {
-  "deleted": "exampleco"
+  "deleted": "newco987"
 }
 ```
 
