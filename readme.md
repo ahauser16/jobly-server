@@ -1049,7 +1049,7 @@ Refactoring `users.js` and `users.test.js` to achieve the aforementioned new aut
 - [x] **Ensure that registration remains open to everyone**: This is handled by the `auth.js` routes and does not need changes in `users.js`.
 - [x] **Ensure that getting the list of all users is only permitted by admins**: Add the `ensureAdmin` middleware to the `GET /` route.
 - [x] **Ensure that getting information on a user, updating, or deleting a user is only permitted either by an admin or by that user**: Create a new _middleware_ function `ensureCorrectUserOrAdmin` to check if the user is either the correct user or an admin.
-  - [ ] This will require tests as well.
+  - [x] This will require tests as well.
 
 #### Postman test 12/3/24
 
@@ -1068,15 +1068,15 @@ We’ve already provided a table for this. Study it.
 
 ### Adding Job Model, Routes, and Tests
 
-Add a model for jobs — you can pattern-match this from the companies model.
+- [x] Add a model for jobs — you can pattern-match this from the companies model.
 
-Updating a job should never change the ID of a job, nor the company associated with a job.
+- [x] Updating a job should never change the ID of a job, nor the company associated with a job.
 
-Write tests for the model.
+- [x] Write tests for the model.
 
-Add routes for jobs. The same routes should be handled as we did for companies (for now, omit the special filtering on the **_GET /_** route), with the same security requirements (anyone can get the jobs, but only admins can add, update, or delete them). Make sure you suitably validate incoming data.
+- [x] Add routes for jobs in `jobs.js` located in the `routes` folder. The same routes should be handled as we did for companies (for now, omit the special filtering on the **_GET /_** route), with the same security requirements (anyone can get the jobs, but only admins can add, update, or delete them). Make sure you suitably validate incoming data.
 
-Write tests for the routes.
+- [ ] Write tests for the routes in `jobs.test.js`.
 
 [Back to TOC](#jobly-table-of-contents)
 
@@ -1084,11 +1084,10 @@ Write tests for the routes.
 
 Similar to the companies filtering for the **_GET /_** route, add filtering for jobs for the following possible filters:
 
-- **_title_**: filter by job title. Like before, this should be a case-insensitive, matches-any-part-of-string search.
-- **_minSalary_**: filter to jobs with at least that salary.
-- **_hasEquity_**: if **_true_**, filter to jobs that provide a non-zero amount of equity. If **_false_** or not included in the filtering, list all jobs regardless of equity.
-
-Write comprehensive tests for this, and document this feature well.
+- [x] **_title_**: filter by job title. Like before, this should be a case-insensitive, matches-any-part-of-string search.
+- [x] **_minSalary_**: filter to jobs with at least that salary.
+- [x] **_hasEquity_**: if **_true_**, filter to jobs that provide a non-zero amount of equity. If **_false_** or not included in the filtering, list all jobs regardless of equity.
+- [x] Write comprehensive tests for this, and document this feature well.
 
 [Back to TOC](#jobly-table-of-contents)
 

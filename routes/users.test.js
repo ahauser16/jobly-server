@@ -227,7 +227,7 @@ describe("GET /users/:username", function () {
 
   test("unauth for non-admin", async function () {
     const resp = await request(app)
-      .get(`/users/u1`)
+      .get(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(403);
   });
@@ -241,7 +241,7 @@ describe("GET /users/:username", function () {
   test("not found if user not found", async function () {
     const resp = await request(app)
       .get(`/users/nope`)
-      .set("authorization", `Bearer ${u1Token}`);
+      .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(404);
   });
 });
@@ -287,7 +287,7 @@ describe("PATCH /users/:username", () => {
 
   test("unauth for non-admin", async function () {
     const resp = await request(app)
-      .patch(`/users/u1`)
+      .patch(`/users/u2`)
       .send({
         firstName: "New",
       })
@@ -364,7 +364,7 @@ describe("DELETE /users/:username", function () {
 
   test("unauth for non-admin", async function () {
     const resp = await request(app)
-      .delete(`/users/u1`)
+      .delete(`/users/u2`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(403);
   });

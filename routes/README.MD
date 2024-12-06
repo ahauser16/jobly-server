@@ -12,22 +12,27 @@ Postman workspace located here: `https://winter-shadow-436327.postman.co/workspa
       - [2. Authenticate the Prime Admin user](#2-authenticate-the-prime-admin-user)
       - [3. Register a Regular User](#3-register-a-regular-user)
       - [4. Authenticate the Regular User](#4-authenticate-the-regular-user)
-      - [5. Register a Second Admin User (Using the Prime Admin Token from Step 2)](#5-register-a-second-admin-user-using-the-prime-admin-token-from-step-2)
+      - [5. Register a Second Admin User](#5-register-a-second-admin-user)
       - [6. Authenticate the Second Admin User](#6-authenticate-the-second-admin-user)
-      - [7. Create a New User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6):](#7-create-a-new-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-      - [8. Get Information on a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#8-get-information-on-a-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-      - [9.  Get Information on a User (Using the User Token from Step 4)](#9--get-information-on-a-user-using-the-user-token-from-step-4)
-      - [10. Retrieve All Users (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#10-retrieve-all-users-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-      - [11. Update a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#11-update-a-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-      - [12. Update a User (Using the User Token from Step 4)](#12-update-a-user-using-the-user-token-from-step-4)
-      - [13. Delete a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#13-delete-a-user-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-      - [14. Delete a User (Using the User Token from Step 4)](#14-delete-a-user-using-the-user-token-from-step-4)
-      - [15. Create a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#15-create-a-company-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
+      - [7. Create a New User:](#7-create-a-new-user)
+      - [8. Get Information on a User](#8-get-information-on-a-user)
+      - [9. Get Information on a User](#9-get-information-on-a-user)
+      - [10. Retrieve All Users](#10-retrieve-all-users)
+      - [11. Update a User](#11-update-a-user)
+      - [12. Update a User](#12-update-a-user)
+      - [13. Delete a User](#13-delete-a-user)
+      - [14. Delete a User](#14-delete-a-user)
+      - [15. Create a Company](#15-create-a-company)
       - [16. Get All Companies](#16-get-all-companies)
       - [17. Get Company by Handle](#17-get-company-by-handle)
-      - [18. Update a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#18-update-a-company-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-      - [19. Delete a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)](#19-delete-a-company-using-either-the-prime-admin-token-from-step-2-or-the-second-admin-token-from-step-6)
-    - [\_testCommon.js](#_testcommonjs)
+      - [18. Update a Company](#18-update-a-company)
+      - [19. Delete a Company](#19-delete-a-company)
+      - [20. Create a Job](#20-create-a-job)
+      - [21. Retrieve All Jobs](#21-retrieve-all-jobs)
+      - [22. Retrieve a Job by its ID](#22-retrieve-a-job-by-its-id)
+      - [23. Update a Job by its ID](#23-update-a-job-by-its-id)
+      - [24. Delete a Job by its ID](#24-delete-a-job-by-its-id)
+    - [`\_testCommon.js`](#_testcommonjs)
       - [\_testCommon.js diagram](#_testcommonjs-diagram)
       - [\_testCommon.js diagram explanation](#_testcommonjs-diagram-explanation)
       - [\_testCommonjs code overview](#_testcommonjs-code-overview)
@@ -84,6 +89,8 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 
 - Description: This request registers the first admin user ("Prime Admin"). This step is necessary to create the initial admin user who can then create other admin users. Normally after this route is used once it should be deactivated and removed from the codebase because the route cannot be protected like the others. The alternative would be to seed the database with a "prime admin" username/password who would then create other admins as needed. This request returns a JWT token which will be **NOT** be needed to authenticate the Prime Admin in the next POST request.
 
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
 #### 2. Authenticate the Prime Admin user
 
 - File Name: `auth.js`
@@ -106,6 +113,8 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
 #### 3. Register a Regular User
 
 - File Name: `auth.js`
@@ -126,6 +135,8 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 ```
 
 - Description: This request registers a regular user. This step is necessary to create a user who can later authenticate (e.g. in the following request) and perform user-specific actions.
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
 #### 4. Authenticate the Regular User
 
@@ -151,8 +162,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 5. Register a Second Admin User (Using the Prime Admin Token from Step 2)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 5. Register a Second Admin User
+
+- Auth: Using the Prime Admin Token from Step 2
 - File Name: `auth.js`
 - Route Declaration: `router.post("/register-admin", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
 - Request Type: **POST**
@@ -173,6 +187,8 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 ```
 
 - Description: This request registers a second admin user. Only an authenticated admin can create another admin.
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
 #### 6. Authenticate the Second Admin User
 
@@ -196,8 +212,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 7. Create a New User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6):
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 7. Create a New User:
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `users.js`
 - Route Declaration: `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
 - Request Type: **POST**
@@ -233,8 +252,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 8. Get Information on a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 8. Get Information on a User
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `users.js`
 - Route Declaration: `router.get("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
 - Request Type: **GET**
@@ -256,8 +278,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 9.  Get Information on a User (Using the User Token from Step 4)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 9. Get Information on a User
+
+- Auth: Using the User Token from Step 4
 - File Name: `users.js`
 - Route Declaration: `router.get("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
 - Request Type: **GET**
@@ -279,8 +304,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 10. Retrieve All Users (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 10. Retrieve All Users
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `users.js`
 - Route Declaration: `router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
 - Request Type: **GET**
@@ -325,8 +353,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 11. Update a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 11. Update a User
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `users.js`
 - Route Declaration: `router.patch("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
 - Request Type: **PATCH**
@@ -358,8 +389,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 12. Update a User (Using the User Token from Step 4)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 12. Update a User
+
+- Auth: Using the User Token from Step 4
 - File Name: `users.js`
 - Route Declaration: `router.patch("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
 - Request Type: **PATCH**
@@ -377,20 +411,25 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-- Description: This request updates the user "regularUser987". Only an authenticated admin or the user themselves can update user information.   The output from the request looks like this: 
+- Description: This request updates the user "regularUser987". Only an authenticated admin or the user themselves can update user information. The output from the request looks like this:
+
 ```json
 {
-    "user": {
-        "username": "regularUser987",
-        "firstName": "Regular-Updated-Again",
-        "lastName": "User-Updated-Again",
-        "email": "regular-updated-again@example.com",
-        "isAdmin": false
-    }
+  "user": {
+    "username": "regularUser987",
+    "firstName": "Regular-Updated-Again",
+    "lastName": "User-Updated-Again",
+    "email": "regular-updated-again@example.com",
+    "isAdmin": false
+  }
 }
 ```
 
-#### 13. Delete a User (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### 13. Delete a User
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `users.js`
 - Route Declaration: `router.delete("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
 - Request Type: **DELETE**
@@ -398,14 +437,19 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 - Headers:
   - Key: `Authorization`
   - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
-- Description: This request deletes the user "newUser987" which was created in Step 7 by an Admin- not by the user themselves, and for the purposes of testing this route it doesn't make a difference. Only an authenticated admin or the user themselves can delete user information.  The output from the request looks like this: 
+- Description: This request deletes the user "newUser987" which was created in Step 7 by an Admin- not by the user themselves, and for the purposes of testing this route it doesn't make a difference. Only an authenticated admin or the user themselves can delete user information. The output from the request looks like this:
+
 ```json
 {
-    "deleted": "newUser987"
+  "deleted": "newUser987"
 }
 ```
 
-#### 14. Delete a User (Using the User Token from Step 4)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### 14. Delete a User
+
+- Auth: Using the User Token from Step 4
 - File Name: `users.js`
 - Route Declaration: `router.delete("/:username", ensureLoggedIn, ensureCorrectUserOrAdmin, async function (req, res, next) { ... });`
 - Request Type: **DELETE**
@@ -413,15 +457,19 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 - Headers:
   - Key: `Authorization`
   - Value: `Bearer <userToken>` (replace `<userToken>` with the token received in Step 4)
-- Description: This request deletes the user "regularUser987". Only an authenticated admin or the user themselves can delete user information.  The output from the request looks like this: 
+- Description: This request deletes the user "regularUser987". Only an authenticated admin or the user themselves can delete user information. The output from the request looks like this:
+
 ```json
 {
-    "deleted": "regularUser987"
+  "deleted": "regularUser987"
 }
 ```
 
-#### 15. Create a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 15. Create a Company
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `companies.js`
 - Route Declaration: `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
 - Request Type: **POST**
@@ -455,6 +503,8 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
 #### 16. Get All Companies
 
 - File Name: `companies.js`
@@ -478,6 +528,8 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
 #### 17. Get Company by Handle
 
 - File Name: `companies.js`
@@ -499,8 +551,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 18. Update a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 18. Update a Company
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `companies.js`
 - Route Declaration: `router.patch("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
 - Request Type: **PATCH**
@@ -533,8 +588,11 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 }
 ```
 
-#### 19. Delete a Company (Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6)
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
+#### 19. Delete a Company
+
+- Auth: Using either the Prime Admin Token from Step 2 or the Second Admin Token from Step 6
 - File Name: `companies.js`
 - Route Declaration: `router.delete("/:handle", ensureLoggedIn, ensureAdmin, async function (req, res, next) { ... });`
 - Request Type: **DELETE**
@@ -552,7 +610,190 @@ The following is a walkthrough of testing each of the routes in `auth.js`, `comp
 
 [Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
 
-### \_testCommon.js
+#### 20. Create a Job
+
+**NB** I needed to create the `jobNew.json` and `jobUpdate.json` files in order to make API requests to the job related routes.
+
+- Auth: Use an Admin Token that was generated from Step 2 or Step 6
+- File Name: `jobs.js`
+- Route Declaration: `router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {`
+- Request Type: **POST**
+- Request URL: `http://localhost:3001/jobs`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Request Body:
+
+```json
+{
+  "title": "Junior Software Engineer",
+  "salary": 120000,
+  "equity": 0.05,
+  "companyHandle": "anderson-arias-morrow"
+}
+```
+
+- Description: This request creates the job "Junior Software Engineer". Only an authenticated admin can create a job. The resulting output looks like this:
+
+```json
+{
+  "job": {
+    "id": 202,
+    "title": "Junior Software Engineer",
+    "salary": 120000,
+    "equity": "0.05",
+    "companyHandle": "anderson-arias-morrow"
+  }
+}
+```
+
+**NB** Keep in mind that if a job is created that does not have a `companyHandle` value that is recognized in the database you will receive a `500` status code and an error as a response in Postman such as the one below:
+
+```json
+{
+  "error": {
+    "message": "insert or update on table \"jobs\" violates foreign key constraint \"jobs_company_handle_fkey\"",
+    "status": 500
+  }
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### 21. Retrieve All Jobs
+
+- Auth: None
+- File Name: `jobs.js`
+- Route Declaration: `router.get("/", async function (req, res, next) {`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/jobs`
+- Request Headers: None
+- Request Body: None
+- Description: This request retrieves all of the jobs in the database. No authentication is required. An excerpt of the resulting output looks like this:
+
+```json
+{
+  "jobs": [
+    {
+      "id": 200,
+      "title": "Accommodation manager",
+      "salary": 126000,
+      "equity": null,
+      "companyHandle": "mejia-scott-ryan"
+    },
+    {
+      "id": 161,
+      "title": "Accountant, chartered certified",
+      "salary": 86000,
+      "equity": "0.070",
+      "companyHandle": "boyd-evans"
+    },
+    {
+      "id": 36,
+      "title": "Accountant, chartered certified",
+      "salary": 175000,
+      "equity": "0",
+      "companyHandle": "stone-stewart"
+    },
+    {
+      "id": 50,
+      "title": "Advertising account executive",
+      "salary": null,
+      "equity": "0",
+      "companyHandle": "thomas-sons"
+    }
+  ]
+}
+```
+
+#### 22. Retrieve a Job by its ID
+
+- Auth: none
+- File Name: `jobs.js`
+- Route Declaration: `router.get("/:id", async function (req, res, next) {`
+- Request Type: **GET**
+- Request URL: `http://localhost:3001/jobs/200`
+- Request Headers: None
+- Request Body: None
+- Description: This request retrieves a job by its id in the database. No authentication is required. An example of the resulting output looks like this:
+
+```json
+{
+    "job": {
+        "id": 200,
+        "title": "Accommodation manager",
+        "salary": 126000,
+        "equity": null,
+        "companyHandle": "mejia-scott-ryan"
+    }
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### 23. Update a Job by its ID
+
+- Auth: Use an Admin Token that was generated from Step 2 or Step 6
+- File Name: `jobs.js`
+- Route Declaration: `router.patch("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {`
+- Request Type: **PATCH**
+- Request URL: `http://localhost:3001/jobs/200`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Request Body:
+```json
+{
+    "title": "Accommodation manager",
+    "salary": 130000,
+    "equity": null
+}
+```
+- Description: This request updates a job by its id in the database. Only an authenticated admin can update a job's information. An example of the resulting output looks like this:
+
+```json
+{
+    "job": {
+        "id": 200,
+        "title": "Accommodation manager",
+        "salary": 130000,
+        "equity": null,
+        "companyHandle": "mejia-scott-ryan"
+    }
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+#### 24. Delete a Job by its ID
+
+- Auth: Use an Admin Token that was generated from Step 2 or Step 6
+- File Name: `jobs.js`
+- Route Declaration: `router.delete("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {`
+- Request Type: **DELETE**
+- Request URL: `http://localhost:3001/jobs/200`
+- Request Headers:
+  - Key: `Authorization`
+  - Value: `Bearer <adminToken>` (replace `<adminToken>` with the token received in Step 2 or Step 6)
+- Request Body:
+```json
+{
+    "title": "Accommodation manager",
+    "salary": 130000,
+    "equity": null
+}
+```
+- Description: This request deletes a job by its id in the database. Only an authenticated admin can delete a job's information. An example of the resulting output looks like this:
+
+```json
+{
+    "deleted": "98"
+}
+```
+
+[Back to TOC](#routes-folder-file-notesexplanationsdiagrams)
+
+### `\_testCommon.js`
 
 This file contains common setup and teardown functions for tests in the routes folder. These functions help ensure that the database is in a consistent state before and after each test.
 

@@ -6,14 +6,13 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
+  ensureCorrectUserOrAdmin,
 } = require("./auth");
-
 
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
 const adminJwt = jwt.sign({ username: "admin", isAdmin: true }, SECRET_KEY);
 const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
-
 
 describe("authenticateJWT", function () {
   test("works: via header", function () {
@@ -120,5 +119,57 @@ describe("ensureAdmin", function () {
       expect(err instanceof ForbiddenError).toBeTruthy();
     };
     ensureAdmin(req, res, next);
+  });
+});
+
+describe("ensureCorrectUserOrAdmin", function () {
+  test("works for admin", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "admin", isAdmin: true } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    ensureCorrectUserOrAdmin(req, res, next);
+  });
+
+  test("works for correct user", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    const next = function (err) {
+      expect(err).toBeFalsy();
+    };
+    ensureCorrectUserOrAdmin(req, res, next);
+  });
+
+  test("forbidden for non-admin and incorrect user", function () {
+    expect.assertions(1);
+    const req = { params: { username: "otherUser" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    const next = function (err) {
+      expect(err instanceof ForbiddenError).toBeTruthy();
+    };
+    ensureCorrectUserOrAdmin(req, res, next);
+  });
+
+  test("forbidden if no login", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test" } };
+    const res = { locals: {} };
+    const next = function (err) {
+      expect(err instanceof ForbiddenError).toBeTruthy();
+    };
+    ensureCorrectUserOrAdmin(req, res, next);
+  });
+
+  test("forbidden if invalid token", function () {
+    expect.assertions(1);
+    const req = { params: { username: "test" }, headers: { authorization: `Bearer ${badJwt}` } };
+    const res = { locals: {} };
+    const next = function (err) {
+      expect(err instanceof ForbiddenError).toBeTruthy();
+    };
+    ensureCorrectUserOrAdmin(req, res, next);
   });
 });
